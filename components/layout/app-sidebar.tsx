@@ -35,7 +35,7 @@ const navigation = [
   { name: "Mantenimiento", href: "/dashboard/maintenance", icon: Wrench, color: "green" },
   { name: "Servicio", href: "/dashboard/service", icon: Headphones, color: "green" },
   { name: "Nómina / RRHH", href: "/dashboard/payroll", icon: UserCog, color: "blue" },
-  { name: "Business Intelligence", href: "/dashboard/bi", icon: BarChart3, color: "blue" },
+  { name: "Business Intelligence", href: "/dashboard/business-intelligence", icon: BarChart3, color: "blue" },
   { name: "ERP Web / Móvil", href: "/dashboard/web-mobile", icon: Smartphone, color: "advanced" },
   { name: "E-Commerce", href: "/dashboard/ecommerce", icon: ShoppingCart, color: "advanced" },
   { name: "E-Procurement", href: "/dashboard/eprocurement", icon: ShoppingBag, color: "advanced" },

@@ -10,7 +10,7 @@ import { QueriesTab } from "@/components/bi/queries-tab"
 import { AssistantTab } from "@/components/bi/assistant-tab"
 import { MapsTab } from "@/components/bi/maps-tab"
 import { ScheduledTab } from "@/components/bi/scheduled-tab"
-import { useAuth } from "@/lib/auth-context"
+import { useAuth } from "@/contexts/auth-context"
 
 const tabs = [
   { id: "dashboards", name: "Tablero", icon: BarChart3 },
@@ -23,6 +23,10 @@ const tabs = [
 export default function BusinessIntelligencePage() {
   const { user } = useAuth()
   const companyId = user?.companyId || ""
+  const userId = user?.uid || ""
+
+  console.log("[v0] BusinessIntelligence - companyId:", companyId, "userId:", userId)
+
   const [activeTab, setActiveTab] = useState("dashboards")
 
   const {
@@ -44,6 +48,20 @@ export default function BusinessIntelligencePage() {
     createExport,
     getDataSource,
   } = useBiData(companyId)
+
+  if (!companyId && !loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Card className="max-w-md">
+          <CardContent className="p-6">
+            <p className="text-center text-muted-foreground">
+              No se pudo obtener el companyId del perfil del usuario. Por favor, verifica tu sesión.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">

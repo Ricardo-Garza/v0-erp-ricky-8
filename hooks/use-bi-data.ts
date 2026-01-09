@@ -18,11 +18,11 @@ import type {
   BankTransaction,
   Employee,
 } from "@/lib/types"
-import { useAuth } from "@/lib/auth-context"
+import { useAuth } from "@/contexts/auth-context"
 import { useToast } from "@/hooks/use-toast"
 
-export function useBiData(companyId: string) {
-  const { user } = useAuth()
+export function useBiData() {
+  const { user, companyId } = useAuth()
   const { toast } = useToast()
 
   // BI collections
@@ -64,7 +64,7 @@ export function useBiData(companyId: string) {
           console.log("[v0] [BI] Queries updated:", data.length)
           setQueries(data)
         },
-        [where("userId", "==", userId)],
+        [where("userId", "==", userId), where("companyId", "==", companyId)],
       ),
       subscribeToCollection<BIDashboard>(
         COLLECTIONS.biDashboards,
@@ -72,7 +72,7 @@ export function useBiData(companyId: string) {
           console.log("[v0] [BI] Dashboards updated:", data.length)
           setDashboards(data)
         },
-        [where("userId", "==", userId)],
+        [where("userId", "==", userId), where("companyId", "==", companyId)],
       ),
       subscribeToCollection<BIReport>(
         COLLECTIONS.biReports,
@@ -80,7 +80,7 @@ export function useBiData(companyId: string) {
           console.log("[v0] [BI] Reports updated:", data.length)
           setReports(data)
         },
-        [where("userId", "==", userId)],
+        [where("userId", "==", userId), where("companyId", "==", companyId)],
       ),
       subscribeToCollection<BIExport>(
         COLLECTIONS.biExports,
@@ -88,7 +88,7 @@ export function useBiData(companyId: string) {
           console.log("[v0] [BI] Exports updated:", data.length)
           setExports(data)
         },
-        [where("userId", "==", userId)],
+        [where("userId", "==", userId), where("companyId", "==", companyId)],
       ),
 
       // Operational data sources
