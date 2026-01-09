@@ -1038,29 +1038,57 @@ export interface FieldServiceOrder extends BaseDocument {
   codigoPostal?: string
   latitud: number
   longitud: number
-  tipo: "mantenimiento" | "reparacion" | "instalacion" | "inspeccion" | "emergencia"
+
+  // Integration with other modules
+  workOrderId?: string | null // Link to Maintenance work order
+  workOrderFolio?: string | null
+  serviceTicketId?: string | null // Link to Service ticket (warranty/return/complaint)
+  serviceTicketFolio?: string | null
+
+  tipo: "mantenimiento" | "reparacion" | "instalacion" | "inspeccion" | "emergencia" | "garantia" | "devolucion"
   categoria: string
   descripcion: string
   prioridad: "baja" | "media" | "alta" | "urgente"
-  estado: "nuevo" | "asignado" | "en_ruta" | "en_sitio" | "finalizado" | "cancelado"
+  estado: "draft" | "asignado" | "en_ruta" | "en_sitio" | "completado" | "cancelado"
   slaHoras: number
   fechaCreacion: Timestamp | string
   fechaProgramada: Timestamp | string
   ventanaInicio?: string // e.g., "08:00"
   ventanaFin?: string // e.g., "12:00"
+
+  // Technician assignment
   tecnicoId?: string
   tecnicoNombre?: string
-  checkIn?: Timestamp | string
-  checkOut?: Timestamp | string
+  fechaAsignacion?: Timestamp | string | null
+
+  // Time tracking
+  checkIn?: Timestamp | string | null
+  checkOut?: Timestamp | string | null
   duracionMinutos?: number
+  tiempoRespuestaMinutos?: number // Time from creation to check-in
+
+  // Evidence and completion
   evidencias: ServiceEvidence[]
-  firmaCliente?: string
+  firmaCliente?: string | null
   checklist: ChecklistItem[]
+
+  // Spare parts consumption from inventory
   refacciones: RefaccionUsada[]
+  almacenRefaccionesId?: string | null
+  almacenRefaccionesNombre?: string | null
+
+  // Product return/pickup handling
+  productosRetirados?: ProductoRetirado[]
+  almacenDestinoId?: string | null // Warehouse for returned products
+  almacenDestinoNombre?: string | null
+
+  // Costs
   costoServicio: number
   costoRefacciones: number
   costoTotal: number
+
   notas: string
+  notasInternas?: string
   bitacora: ServiceLogEntry[]
 }
 
@@ -1082,10 +1110,30 @@ export interface ChecklistItem {
 export interface RefaccionUsada {
   id: string
   productoId?: string
-  descripcion: string
+  sku: string
+  nombre: string
   cantidad: number
+  unidadBase: string
   costoUnitario: number
   costoTotal: number
+  lote?: string | null
+  serie?: string | null
+  // Reference to inventory movement created
+  movimientoId?: string | null
+}
+
+export interface ProductoRetirado {
+  id: string
+  productoId: string
+  productoNombre: string
+  sku: string
+  cantidad: number
+  lote?: string | null
+  serie?: string | null
+  motivo: "devolucion" | "retiro" | "reemplazo" | "scrap"
+  estadoDisposicion: "reingreso_stock" | "cuarentena" | "scrap" | "reparacion"
+  notas?: string
+  evidencias?: string[]
 }
 
 export interface ServiceLogEntry {
@@ -1107,13 +1155,14 @@ export interface FieldTechnician extends BaseDocument {
   rating: number // 0-5
   totalServicios: number
   serviciosCompletados: number
+  serviciosEnProgreso: number
   unidad?: string // Vehicle info
   placas?: string
-  latitudActual?: number
-  longitudActual?: number
-  ultimaActualizacion?: Timestamp | string
   certificaciones?: string[]
   nivelExperiencia: "junior" | "mid" | "senior"
+  horarioInicio?: string // "08:00"
+  horarioFin?: string // "18:00"
+  servicioActualId?: string | null
 }
 
 // Real-time Location Tracking
@@ -1126,7 +1175,9 @@ export interface TechnicianLocation extends BaseDocument {
   velocidad?: number
   rumbo?: number
   timestamp: Timestamp | string
-  servicioActualId?: string
+  servicioActualId?: string | null
+  servicioActualFolio?: string | null
+  estado: "en_ruta" | "en_sitio" | "disponible" | "fuera_servicio"
 }
 
 export interface FieldServiceMetrics {

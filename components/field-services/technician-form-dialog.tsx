@@ -1,9 +1,8 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -95,6 +94,11 @@ export default function TechnicianFormDialog({ open, onOpenChange, technician, o
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{technician ? "Editar Técnico" : "Nuevo Técnico"}</DialogTitle>
+          <DialogDescription>
+            {technician
+              ? "Actualiza la información del técnico de campo existente."
+              : "Registra un nuevo técnico para asignar servicios en campo."}
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
