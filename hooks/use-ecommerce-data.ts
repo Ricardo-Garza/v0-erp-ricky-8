@@ -7,8 +7,8 @@ import type { EcommerceProduct, EcommerceOrder, ProductReview, Promotion } from 
 import { useAuth } from "@/contexts/auth-context"
 import { toast } from "@/hooks/use-toast"
 
-export function useEcommerceData() {
-  const { user, companyId } = useAuth()
+export function useEcommerceData(companyId: string | null) {
+  const { user } = useAuth()
   const [products, setProducts] = useState<EcommerceProduct[]>([])
   const [orders, setOrders] = useState<EcommerceOrder[]>([])
   const [reviews, setReviews] = useState<ProductReview[]>([])
@@ -164,7 +164,7 @@ export function useEcommerceData() {
       await updateItem<EcommerceOrder>(COLLECTIONS.ecommerceOrders, id, updates)
       toast({ title: "Pedido actualizado", description: "El estado se ha actualizado correctamente" })
     } catch (error) {
-      console.error("[v0] Error updating order:", error)
+      console.error("[v0] useEcommerceData - Error updating order:", error)
       toast({ title: "Error", description: "No se pudo actualizar el pedido", variant: "destructive" })
     }
   }
@@ -177,7 +177,7 @@ export function useEcommerceData() {
       })
       toast({ title: "Reseña actualizada", description: approved ? "Reseña aprobada" : "Reseña rechazada" })
     } catch (error) {
-      console.error("[v0] Error updating review:", error)
+      console.error("[v0] useEcommerceData - Error updating review:", error)
       toast({ title: "Error", description: "No se pudo actualizar la reseña", variant: "destructive" })
     }
   }

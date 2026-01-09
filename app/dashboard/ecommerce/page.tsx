@@ -12,11 +12,11 @@ import { CustomerPortalTab } from "@/components/ecommerce/customer-portal-tab"
 import { SettingsTab } from "@/components/ecommerce/settings-tab"
 
 export default function ECommercePage() {
-  const { user, companyId } = useAuth()
-  const ecommerceData = useEcommerceData()
+  const { user, companyId, loading: authLoading } = useAuth()
+  const ecommerceData = useEcommerceData(companyId)
   const { loading } = ecommerceData
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
@@ -31,11 +31,19 @@ export default function ECommercePage() {
     return (
       <div className="flex items-center justify-center h-96">
         <Card className="max-w-md">
-          <CardContent className="pt-6">
-            <p className="text-center text-muted-foreground">
-              No se pudo obtener el companyId. Por favor, verifica tu sesión.
+          <CardContent className="pt-6 space-y-4">
+            <p className="text-center text-muted-foreground">No se pudo obtener la información de la empresa.</p>
+            <p className="text-xs text-center text-muted-foreground">
+              Debug: userId={user?.uid || "none"}, companyId={companyId || "none"}
             </p>
-            <p className="text-xs text-center text-muted-foreground mt-2">Debug: userId={user?.uid}</p>
+            <div className="text-center">
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+              >
+                Recargar Página
+              </button>
+            </div>
           </CardContent>
         </Card>
       </div>
