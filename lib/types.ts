@@ -1830,3 +1830,544 @@ interface Activity {
   userId?: string
   userName?: string
 }
+
+export interface Employee extends BaseDocument {
+  numeroEmpleado: string
+  nombre: string
+  apellidoPaterno: string
+  apellidoMaterno: string
+  rfc: string
+  curp: string
+  nss: string
+  fechaNacimiento: Timestamp | string
+  fechaIngreso: Timestamp | string
+  fechaBaja?: Timestamp | string
+  departamento: string
+  puesto: string
+  nivelPuesto: string
+  tipoContrato: "planta" | "temporal" | "honorarios" | "outsourcing"
+  salarioDiario: number
+  salarioMensual: number
+  moneda: "MXN" | "USD"
+  bancoId?: string
+  cuentaBancaria?: string
+  clabe?: string
+  email: string
+  telefono: string
+  direccion?: string
+  ciudad?: string
+  estado?: string
+  codigoPostal?: string
+  contactoEmergencia?: string
+  telefonoEmergencia?: string
+  estado: "activo" | "inactivo" | "suspendido" | "baja"
+  foto?: string
+  notas?: string
+}
+
+export interface PayrollPeriod extends BaseDocument {
+  periodo: string // e.g., "2026-01" or "2026-Q1-15"
+  tipo: "quincenal" | "mensual" | "semanal"
+  fechaInicio: Timestamp | string
+  fechaFin: Timestamp | string
+  fechaPago: Timestamp | string
+  estado: "borrador" | "calculada" | "autorizada" | "pagada" | "cerrada"
+  totalNomina: number
+  totalPercepciones: number
+  totalDeducciones: number
+  totalEmpleados: number
+  autorizadaPor?: string
+  fechaAutorizacion?: Timestamp | string
+  notas?: string
+}
+
+export interface PayrollReceipt extends BaseDocument {
+  periodoId: string
+  periodo: string
+  empleadoId: string
+  empleadoNombre: string
+  numeroEmpleado: string
+  fechaPago: Timestamp | string
+  diasTrabajados: number
+  salarioDiario: number
+  percepciones: PayrollConcept[]
+  deducciones: PayrollConcept[]
+  totalPercepciones: number
+  totalDeducciones: number
+  netoAPagar: number
+  estado: "borrador" | "calculado" | "pagado" | "cancelado"
+  metodoPago: "transferencia" | "efectivo" | "cheque"
+  cuentaBancariaId?: string
+  referenciaPago?: string
+  xmlUrl?: string
+  pdfUrl?: string
+  timbrado: boolean
+  fechaTimbrado?: Timestamp | string
+  uuid?: string
+  notas?: string
+}
+
+export interface PayrollConcept {
+  clave: string
+  concepto: string
+  tipo: "percepcion" | "deduccion"
+  monto: number
+  gravado: boolean
+  base?: number
+}
+
+export interface AttendanceRecord extends BaseDocument {
+  empleadoId: string
+  empleadoNombre: string
+  fecha: Timestamp | string
+  horaEntrada?: Timestamp | string
+  horaSalida?: Timestamp | string
+  horasTrabajadas: number
+  horasExtra: number
+  tipo: "normal" | "falta" | "permiso" | "vacaciones" | "incapacidad"
+  justificada: boolean
+  notas?: string
+}
+
+export interface VacationRequest extends BaseDocument {
+  empleadoId: string
+  empleadoNombre: string
+  fechaSolicitud: Timestamp | string
+  fechaInicio: Timestamp | string
+  fechaFin: Timestamp | string
+  diasSolicitados: number
+  diasDisponibles: number
+  motivo?: string
+  estado: "pendiente" | "aprobada" | "rechazada" | "cancelada"
+  aprobadaPor?: string
+  fechaAprobacion?: Timestamp | string
+  comentarios?: string
+}
+
+export interface PerformanceReview extends BaseDocument {
+  empleadoId: string
+  empleadoNombre: string
+  periodo: string
+  fecha: Timestamp | string
+  evaluadorId: string
+  evaluadorNombre: string
+  calificaciones: ReviewScore[]
+  calificacionTotal: number
+  fortalezas?: string
+  areasDeOportunidad?: string
+  objetivos?: string
+  comentarios?: string
+  estado: "borrador" | "completada" | "aprobada"
+}
+
+export interface ReviewScore {
+  categoria: string
+  calificacion: number // 1-5
+  peso: number
+  comentario?: string
+}
+
+export interface EcommerceProduct extends BaseDocument {
+  productoId: string // Reference to main product
+  sku: string
+  nombre: string
+  descripcion: string
+  categoriaId?: string
+  categoriaNombre?: string
+  precio: number
+  precioOriginal?: number // For showing discounts
+  moneda: "MXN" | "USD"
+  imagenes: string[]
+  imagenPrincipal: string
+  variantes: ProductVariant[] // Color, size, etc.
+  atributos: Record<string, string>
+  stock: number // From inventory
+  almacenId: string // Source warehouse
+  disponible: boolean
+  publicado: boolean
+  fechaPublicacion?: Timestamp | string
+  destacado: boolean
+  orden?: number
+  seoTitle?: string
+  seoDescription?: string
+  seoKeywords?: string[]
+  etiquetas: string[]
+  calificacionPromedio: number
+  numeroReviews: number
+}
+
+export interface EcommerceOrder extends BaseDocument {
+  folio: string
+  clienteId?: string // Registered customer
+  clienteEmail: string
+  clienteNombre: string
+  clienteTelefono: string
+  direccionEnvio: ShippingAddress
+  direccionFacturacion?: BillingAddress
+  items: EcommerceOrderItem[]
+  subtotal: number
+  iva: number
+  envio: number
+  descuento: number
+  total: number
+  moneda: "MXN" | "USD"
+  estadoPedido: "pendiente" | "confirmado" | "preparando" | "enviado" | "entregado" | "cancelado"
+  estadoPago: "pendiente" | "pagado" | "rechazado" | "reembolsado"
+  metodoPago: "tarjeta" | "transferencia" | "paypal" | "stripe" | "mercadopago" | "contra_entrega"
+  referenciaPago?: string
+  fechaPedido: Timestamp | string
+  fechaPago?: Timestamp | string
+  fechaEnvio?: Timestamp | string
+  fechaEntrega?: Timestamp | string
+  rastreo?: string
+  paqueteria?: string
+  ordenVentaId?: string // Link to internal sales order
+  remisionId?: string
+  facturaId?: string
+  requiereFactura: boolean
+  datosFacturacion?: FacturaData
+  notas?: string
+}
+
+export interface EcommerceOrderItem {
+  productoId: string
+  varianteId?: string
+  sku: string
+  nombre: string
+  imagen: string
+  cantidad: number
+  precio: number
+  subtotal: number
+  atributos?: Record<string, string>
+}
+
+export interface ShippingAddress {
+  nombre: string
+  direccion: string
+  colonia?: string
+  ciudad: string
+  estado: string
+  codigoPostal: string
+  pais: string
+  telefono: string
+  referencia?: string
+}
+
+export interface BillingAddress {
+  razonSocial: string
+  rfc: string
+  direccion: string
+  colonia?: string
+  ciudad: string
+  estado: string
+  codigoPostal: string
+  pais: string
+  email: string
+}
+
+export interface FacturaData {
+  razonSocial: string
+  rfc: string
+  usoCFDI: string
+  direccion: string
+  email: string
+}
+
+export interface EcommerceCustomer extends BaseDocument {
+  email: string
+  nombre: string
+  apellidos: string
+  telefono: string
+  fechaRegistro: Timestamp | string
+  ultimaCompra?: Timestamp | string
+  totalCompras: number
+  numeroOrdenes: number
+  direcciones: ShippingAddress[]
+  datosFacturacion?: BillingAddress
+  preferencias?: {
+    newsletter: boolean
+    notificaciones: boolean
+  }
+  estado: "activo" | "inactivo"
+}
+
+export interface ShoppingCart extends BaseDocument {
+  sessionId?: string // For guest users
+  clienteId?: string // For registered users
+  items: CartItem[]
+  subtotal: number
+  fechaCreacion: Timestamp | string
+  fechaActualizacion: Timestamp | string
+  expiraEn: Timestamp | string
+}
+
+export interface CartItem {
+  productoId: string
+  varianteId?: string
+  sku: string
+  nombre: string
+  imagen: string
+  precio: number
+  cantidad: number
+  subtotal: number
+  disponible: boolean
+}
+
+export interface ProductReview extends BaseDocument {
+  productoId: string
+  clienteId?: string
+  clienteNombre: string
+  clienteEmail: string
+  calificacion: number // 1-5
+  titulo: string
+  comentario: string
+  verificado: boolean // Verified purchase
+  util: number // Helpful votes
+  fechaCompra?: Timestamp | string
+  respuestaVendedor?: string
+  fechaRespuesta?: Timestamp | string
+  estado: "pendiente" | "aprobado" | "rechazado"
+}
+
+export interface Promotion extends BaseDocument {
+  codigo: string
+  nombre: string
+  descripcion: string
+  tipo: "porcentaje" | "monto_fijo" | "envio_gratis" | "2x1"
+  valor: number
+  moneda?: "MXN" | "USD"
+  fechaInicio: Timestamp | string
+  fechaFin: Timestamp | string
+  usoMaximo?: number
+  usoActual: number
+  usoPorCliente?: number
+  montoMinimo?: number
+  productosAplicables?: string[]
+  categoriasAplicables?: string[]
+  estado: "activa" | "inactiva" | "expirada"
+  publico: boolean
+}
+
+export interface SupplierCatalog extends BaseDocument {
+  proveedorId: string
+  proveedorNombre: string
+  productoId?: string // Link to internal product if exists
+  sku: string
+  codigoProveedor: string
+  nombre: string
+  descripcion: string
+  categoria: string
+  unidad: string
+  precio: number
+  moneda: "MXN" | "USD" | "EUR"
+  leadTime: number // Days
+  cantidadMinima: number
+  cantidadMaxima?: number
+  disponible: boolean
+  imagenUrl?: string
+  especificaciones?: string
+  certificaciones?: string[]
+  ultimaActualizacion: Timestamp | string
+}
+
+export interface PurchaseRequisition extends BaseDocument {
+  folio: string
+  departamento: string
+  solicitante: string
+  solicitanteId: string
+  fechaSolicitud: Timestamp | string
+  fechaRequerida: Timestamp | string
+  items: RequisitionItem[]
+  justificacion: string
+  presupuesto?: number
+  estado: "borrador" | "enviada" | "aprobada" | "rechazada" | "procesada" | "cancelada"
+  aprobadores: Approver[]
+  ordenCompraId?: string
+  prioridad: "baja" | "media" | "alta" | "urgente"
+  proyecto?: string
+  centroCostos?: string
+  notas?: string
+}
+
+export interface RequisitionItem {
+  productoId?: string
+  sku?: string
+  descripcion: string
+  cantidad: number
+  unidad: string
+  precioEstimado: number
+  total: number
+  proveedorSugerido?: string
+  especificaciones?: string
+}
+
+export interface Approver {
+  usuarioId: string
+  nombre: string
+  rol: string
+  nivel: number
+  estado: "pendiente" | "aprobado" | "rechazado"
+  fecha?: Timestamp | string
+  comentarios?: string
+}
+
+export interface RFQ extends BaseDocument {
+  folio: string
+  titulo: string
+  descripcion: string
+  items: RFQItem[]
+  requisicionId?: string
+  proveedoresInvitados: string[]
+  fechaEmision: Timestamp | string
+  fechaCierre: Timestamp | string
+  estado: "borrador" | "publicada" | "cerrada" | "adjudicada" | "cancelada"
+  cotizacionesRecibidas: number
+  criteriosEvaluacion: EvaluationCriteria[]
+  adjudicadaA?: string
+  notas?: string
+}
+
+export interface RFQItem {
+  productoId?: string
+  sku?: string
+  descripcion: string
+  cantidad: number
+  unidad: string
+  especificaciones?: string
+  archivosAdjuntos?: string[]
+}
+
+export interface EvaluationCriteria {
+  criterio: string
+  peso: number // Percentage
+}
+
+export interface SupplierQuotation extends BaseDocument {
+  rfqId: string
+  rfqFolio: string
+  proveedorId: string
+  proveedorNombre: string
+  fechaEnvio: Timestamp | string
+  fechaValidez: Timestamp | string
+  items: QuotationItem[]
+  subtotal: number
+  iva: number
+  total: number
+  moneda: "MXN" | "USD" | "EUR"
+  terminosPago: string
+  tiempoEntrega: number // Days
+  garantia?: string
+  validez: number // Days
+  estado: "recibida" | "evaluando" | "aceptada" | "rechazada"
+  evaluacion?: QuotationEvaluation
+  archivoUrl?: string
+  notas?: string
+}
+
+export interface QuotationItem {
+  descripcion: string
+  cantidad: number
+  unidad: string
+  precioUnitario: number
+  subtotal: number
+  especificaciones?: string
+}
+
+export interface QuotationEvaluation {
+  puntuacionPrecio: number
+  puntuacionCalidad: number
+  puntuacionEntrega: number
+  puntuacionTerminos: number
+  puntuacionTotal: number
+  comentarios?: string
+  evaluadoPor: string
+  fechaEvaluacion: Timestamp | string
+}
+
+export interface ContractAgreement extends BaseDocument {
+  folio: string
+  tipo: "suministro" | "servicio" | "marco" | "confidencialidad"
+  proveedorId: string
+  proveedorNombre: string
+  titulo: string
+  descripcion: string
+  fechaInicio: Timestamp | string
+  fechaFin: Timestamp | string
+  monto: number
+  moneda: "MXN" | "USD" | "EUR"
+  terminosPago: string
+  renovacionAutomatica: boolean
+  productos: string[]
+  clausulas?: string
+  archivoUrl?: string
+  estado: "borrador" | "vigente" | "por_vencer" | "vencido" | "cancelado"
+  responsable: string
+  alertaDias?: number
+  notas?: string
+}
+
+export interface ReportTemplate extends BaseDocument {
+  nombre: string
+  descripcion: string
+  categoria: "ventas" | "compras" | "inventario" | "financiero" | "produccion" | "rrhh" | "custom"
+  tipo: "dashboard" | "reporte" | "grafica"
+  configuracion: ReportConfig
+  columnas?: ReportColumn[]
+  filtros?: ReportFilter[]
+  compartido: boolean
+  publico: boolean
+  creadoPor: string
+  favoritoParaUsuarios: string[]
+}
+
+export interface ReportConfig {
+  fuenteDatos: string[] // Collection names
+  agrupacion?: string[]
+  ordenamiento?: string[]
+  limiteRegistros?: number
+  actualizacionAutomatica: boolean
+  intervaloActualizacion?: number // Minutes
+}
+
+export interface ReportColumn {
+  campo: string
+  etiqueta: string
+  tipo: "texto" | "numero" | "moneda" | "fecha" | "porcentaje"
+  agregacion?: "sum" | "avg" | "count" | "min" | "max"
+  visible: boolean
+  orden: number
+}
+
+export interface ReportFilter {
+  campo: string
+  operador: "igual" | "diferente" | "mayor" | "menor" | "contiene" | "entre"
+  valor: any
+  activo: boolean
+}
+
+export interface DashboardConfig extends BaseDocument {
+  nombre: string
+  descripcion: string
+  widgets: DashboardWidget[]
+  layout: LayoutConfig
+  compartido: boolean
+  publico: boolean
+  creadoPor: string
+  usuariosConAcceso: string[]
+  predeterminado: boolean
+}
+
+export interface DashboardWidget {
+  id: string
+  tipo: "kpi" | "grafica" | "tabla" | "mapa" | "gauge"
+  titulo: string
+  reporteId?: string
+  configuracion: any
+  posicion: { x: number; y: number; w: number; h: number }
+}
+
+export interface LayoutConfig {
+  columnas: number
+  filas: number
+  responsive: boolean
+}

@@ -24,7 +24,13 @@ export const COLLECTIONS = {
   customers: "customers",
   orders: "orders",
   suppliers: "suppliers",
-  employees: "employees",
+  employees: "employees", // HR/Payroll
+  payrollPeriods: "payrollPeriods",
+  payrollConcepts: "payrollConcepts",
+  payrollReceipts: "payrollReceipts",
+  attendanceRecords: "attendanceRecords",
+  vacationRequests: "vacationRequests",
+  performanceReviews: "performanceReviews",
   invoices: "invoices",
   quotations: "quotations",
   prospects: "prospects",
@@ -86,6 +92,19 @@ export const COLLECTIONS = {
   salesOrderActivities: "salesOrderActivities",
   productBatches: "productBatches", // Lotes y trazabilidad
   exchangeRates: "exchangeRates", // Tipos de cambio
+  ecommerceProducts: "ecommerceProducts", // Published catalog
+  ecommerceOrders: "ecommerceOrders",
+  ecommerceCustomers: "ecommerceCustomers",
+  shoppingCarts: "shoppingCarts",
+  productReviews: "productReviews",
+  promotions: "promotions",
+  supplierCatalog: "supplierCatalog",
+  purchaseRequisitions: "purchaseRequisitions",
+  rfqs: "rfqs", // Request for Quotations
+  supplierQuotations: "supplierQuotations",
+  contractAgreements: "contractAgreements",
+  reportTemplates: "reportTemplates",
+  dashboardConfigs: "dashboardConfigs",
 } as const
 
 export type CollectionName = (typeof COLLECTIONS)[keyof typeof COLLECTIONS]
