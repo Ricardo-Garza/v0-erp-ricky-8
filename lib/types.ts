@@ -1221,6 +1221,23 @@ export interface JournalEntry extends BaseDocument {
   totalAbonos: number // Total credits
   diferencia: number // Should be 0 for balanced entry
   notas?: string
+
+  // Source tracking for automatic posting
+  sourceType?:
+    | "salesOrder"
+    | "salesInvoice"
+    | "delivery"
+    | "purchaseOrder"
+    | "goodsReceipt"
+    | "accountPayable"
+    | "bankTransaction"
+    | "serviceTicket"
+    | "workOrder"
+    | "fieldServiceOrder"
+    | "manual"
+  sourceId?: string // ID of the originating document
+  sourceFolio?: string // Folio of the originating document
+  autoPosted: boolean // Was this entry automatically generated?
 }
 
 export interface JournalMovement {
@@ -2035,7 +2052,6 @@ export interface EcommerceOrderItem {
   sku: string
   nombre: string
   imagen: string
-  cantidad: number
   precio: number
   subtotal: number
   atributos?: Record<string, string>
