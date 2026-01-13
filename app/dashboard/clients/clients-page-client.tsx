@@ -1017,7 +1017,7 @@ export default function ClientsPageClient() {
         onOpenChange={setDialogOpen}
         title={editingItem ? `Editar ${currentModule}` : `Nuevo ${currentModule}`}
         fields={getCurrentFields()}
-        defaultValues={editingItem || {}}
+        initialValues={editingItem || undefined}
         onSubmit={handleSave}
       />
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

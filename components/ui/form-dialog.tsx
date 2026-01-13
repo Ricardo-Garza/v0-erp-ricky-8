@@ -23,6 +23,8 @@ type Field = {
   options?: { value: string; label: string }[]
 }
 
+const EMPTY_VALUES: Record<string, any> = {}
+
 type FormDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -40,7 +42,7 @@ export function FormDialog({
   title,
   description,
   fields,
-  initialValues = {},
+  initialValues = EMPTY_VALUES,
   onSubmit,
   submitLabel = "Guardar",
 }: FormDialogProps) {
