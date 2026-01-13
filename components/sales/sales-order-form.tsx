@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useAuth } from "@/hooks/use-auth"
+import { useSearchParams } from "next/navigation"
 import { useFirestore } from "@/hooks/use-firestore"
 import { useSalesData } from "@/hooks/use-sales-data"
 import { useWarehouseData } from "@/hooks/use-warehouse-data"
@@ -34,6 +35,7 @@ interface SalesOrderFormProps {
 export function SalesOrderForm({ salesOrderId, onSuccess, onCancel }: SalesOrderFormProps) {
   const { user } = useAuth()
   const companyId = user?.companyId || user?.uid || ""
+  const searchParams = useSearchParams()
 
   // Load warehouse data for validation
   const { warehouses, inventoryStock, loading: loadingWarehouse } = useWarehouseData()
@@ -66,8 +68,8 @@ export function SalesOrderForm({ salesOrderId, onSuccess, onCancel }: SalesOrder
     COLLECTIONS.customers,
     companyId ? [where("companyId", "==", companyId)] : [],
   )
-  const { items: products } = useFirestore<Product>(COLLECTIONS.products, companyId)
-  const { items: existingOrders } = useFirestore<SalesOrder>(COLLECTIONS.salesOrders, companyId)
+  const { items: products } = useFirestore<Product>(COLLECTIONS.products, [], true)
+  const { items: existingOrders } = useFirestore<SalesOrder>(COLLECTIONS.salesOrders, [], true)
 
   // Load existing order
   useEffect(() => {
@@ -75,6 +77,20 @@ export function SalesOrderForm({ salesOrderId, onSuccess, onCancel }: SalesOrder
       loadOrder()
     }
   }, [salesOrderId])
+
+  useEffect(() => {
+    if (salesOrderId) return
+    const customerIdParam = searchParams.get("customerId")
+    const typeParam = searchParams.get("type")
+
+    if (customerIdParam && !order.customerId) {
+      setOrder((prev) => ({ ...prev, customerId: customerIdParam }))
+    }
+
+    if (typeParam === "quotation" || typeParam === "order") {
+      setOrder((prev) => (prev.type === typeParam ? prev : { ...prev, type: typeParam }))
+    }
+  }, [searchParams, salesOrderId, order.customerId, order.type])
 
   const loadOrder = async () => {
     if (!salesOrderId) return
@@ -147,9 +163,10 @@ export function SalesOrderForm({ salesOrderId, onSuccess, onCancel }: SalesOrder
       toast.error("Agrega al menos un producto")
       return
     }
+    const isQuotation = order.type === "quotation"
 
     // Validate stock if confirming order
-    if (!asDraft && stockWarnings.length > 0) {
+    if (!asDraft && !isQuotation && stockWarnings.length > 0) {
       toast.error("Inventario insuficiente en el almacén seleccionado")
       return
     }
@@ -165,10 +182,11 @@ export function SalesOrderForm({ salesOrderId, onSuccess, onCancel }: SalesOrder
       const customer = customers.find((c) => c.id === order.customerId)
       const warehouse = warehouses.find((w) => w.id === order.warehouseId)
 
+      const isQuotationOrder = order.type === "quotation"
       const orderData: Partial<SalesOrder> = {
         orderNumber: order.orderNumber || "",
         type: order.type || "order",
-        status: asDraft ? order.status || "draft" : "confirmed",
+        status: asDraft ? order.status || "draft" : isQuotationOrder ? "quotation" : "confirmed",
         customerId: order.customerId,
         customerName: customer?.nombre || "",
         // Always include warehouse info
@@ -219,7 +237,7 @@ export function SalesOrderForm({ salesOrderId, onSuccess, onCancel }: SalesOrder
       }
 
       // If confirming, fulfill order and create inventory movements
-      if (!asDraft && orderId && order.warehouseId) {
+      if (!asDraft && !isQuotationOrder && orderId && order.warehouseId) {
         console.log("[v0] Confirming order, creating inventory movements")
         await fulfillSalesOrder(orderId, order.warehouseId, warehouse?.nombre || "")
       }
@@ -262,9 +280,9 @@ export function SalesOrderForm({ salesOrderId, onSuccess, onCancel }: SalesOrder
     }
   }
 
-  const canGenerateDelivery = order.status === "confirmed" || order.status === "in_progress"
-  const canGenerateInvoice =
-    order.status === "confirmed" || order.status === "delivered" || order.status === "invoiced_partial"
+  const isQuotationStatus = order.type === "quotation"
+  const canGenerateDelivery = !isQuotationStatus && (order.status === "confirmed" || order.status === "in_progress")
+  const canGenerateInvoice = !isQuotationStatus && (order.status === "confirmed" || order.status === "delivered" || order.status === "invoiced_partial")
 
   if (loading || loadingWarehouse) {
     return (
@@ -643,3 +661,4 @@ export function SalesOrderForm({ salesOrderId, onSuccess, onCancel }: SalesOrder
     </div>
   )
 }
+

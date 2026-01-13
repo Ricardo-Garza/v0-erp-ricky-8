@@ -47,7 +47,6 @@ const sections = [
       { name: "Mantenimiento", href: "/dashboard/maintenance", icon: Wrench },
       { name: "Servicio", href: "/dashboard/service", icon: Headphones },
       { name: "Field Services", href: "/dashboard/field-services", icon: MapPin },
-      { name: "Calendario", href: "/dashboard/calendar", icon: CalendarDays },
     ],
   },
   {

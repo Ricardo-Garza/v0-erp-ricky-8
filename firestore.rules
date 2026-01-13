@@ -42,7 +42,19 @@ service cloud.firestore {
       allow update, delete: if isOwner(resource.data.userId);
     }
 
+    match /prospects/{prospectId} {
+      allow read: if isAuthenticated();
+      allow create: if hasValidUserId();
+      allow update, delete: if isOwner(resource.data.userId);
+    }
+
     match /leads/{leadId} {
+      allow read: if isAuthenticated();
+      allow create: if hasValidUserId();
+      allow update, delete: if isOwner(resource.data.userId);
+    }
+
+    match /documents/{docId} {
       allow read: if isAuthenticated();
       allow create: if hasValidUserId();
       allow update, delete: if isOwner(resource.data.userId);
@@ -214,6 +226,12 @@ service cloud.firestore {
     }
 
     match /supplierDocuments/{docId} {
+      allow read: if isAuthenticated();
+      allow create: if hasValidUserId();
+      allow update, delete: if isOwner(resource.data.userId);
+    }
+
+    match /notifications/{notificationId} {
       allow read: if isAuthenticated();
       allow create: if hasValidUserId();
       allow update, delete: if isOwner(resource.data.userId);

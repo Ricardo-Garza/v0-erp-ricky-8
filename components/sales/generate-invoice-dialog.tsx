@@ -40,7 +40,7 @@ export function GenerateInvoiceDialog({ salesOrder, open, onClose, onSuccess }: 
   const [metodoPago, setMetodoPago] = useState("PUE")
   const [notes, setNotes] = useState("")
 
-  const { items: existingInvoices } = useFirestore<Invoice>(COLLECTIONS.salesInvoices, companyId)
+  const { items: existingInvoices } = useFirestore<Invoice>(COLLECTIONS.salesInvoices, [], true)
 
   const handleGenerate = async () => {
     if (!customerRFC) {

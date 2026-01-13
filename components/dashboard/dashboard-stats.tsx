@@ -12,7 +12,7 @@ export function DashboardStats() {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {[1, 2, 3, 4].map((i) => (
-          <Card key={i}>
+          <Card key={i} className="border-white/10 bg-white/10 text-white shadow-[0_20px_45px_rgba(15,23,42,0.35)]">
             <CardContent className="p-6">
               <Skeleton className="h-12 w-12 rounded-lg" />
               <Skeleton className="h-4 w-24 mt-4" />
@@ -67,19 +67,19 @@ export function DashboardStats() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat) => (
-        <Card key={stat.name}>
+        <Card key={stat.name} className="border-white/10 bg-white/10 text-white shadow-[0_20px_45px_rgba(15,23,42,0.35)]">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                <stat.icon className="w-6 h-6 text-primary" />
+              <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center">
+                <stat.icon className="w-6 h-6 text-cyan-300" />
               </div>
               <div
                 className={`flex items-center gap-1 text-sm font-medium ${
                   stat.trend === "up"
-                    ? "text-green-600"
+                    ? "text-emerald-300"
                     : stat.trend === "down"
-                      ? "text-red-600"
-                      : "text-muted-foreground"
+                      ? "text-rose-300"
+                      : "text-white/70"
                 }`}
               >
                 {stat.trend === "up" ? (
@@ -91,8 +91,8 @@ export function DashboardStats() {
               </div>
             </div>
             <div className="mt-4">
-              <p className="text-sm text-muted-foreground">{stat.name}</p>
-              <p className="text-2xl font-bold mt-1">{stat.value}</p>
+              <p className="text-sm text-white/70">{stat.name}</p>
+              <p className="text-2xl font-semibold mt-1 text-white">{stat.value}</p>
             </div>
           </CardContent>
         </Card>

@@ -258,48 +258,50 @@ export default function FacturacionPage() {
                 ) : filteredDocs.length === 0 ? (
                   <div className="p-6 text-sm text-muted-foreground">No hay registros para este tipo.</div>
                 ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Cliente</TableHead>
-                        <TableHead>UUID</TableHead>
-                        <TableHead>Estatus</TableHead>
-                        <TableHead>Total</TableHead>
-                        <TableHead>Vendedor</TableHead>
-                        <TableHead className="text-right">Acciones</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredDocs.map((doc) => (
-                        <TableRow key={doc.id}>
-                          <TableCell className="font-medium">{doc.clienteNombre || "Sin cliente"}</TableCell>
-                          <TableCell>{doc.uuid || "-"}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{statusLabels[doc.estatus] || doc.estatus}</Badge>
-                          </TableCell>
-                          <TableCell>
-                            {(doc.total || 0).toLocaleString("es-MX", { style: "currency", currency: "MXN" })}
-                          </TableCell>
-                          <TableCell>{doc.vendedor || "-"}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-1">
-                              <Button size="icon" variant="ghost" onClick={() => openEdit(doc)}>
-                                <Pencil className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="text-destructive hover:text-destructive"
-                                onClick={() => remove(doc.id)}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
+                  <div className="overflow-hidden rounded-2xl border border-white/10">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="h-9">Cliente</TableHead>
+                          <TableHead className="h-9">UUID</TableHead>
+                          <TableHead className="h-9">Estatus</TableHead>
+                          <TableHead className="h-9">Total</TableHead>
+                          <TableHead className="h-9">Vendedor</TableHead>
+                          <TableHead className="h-9 text-right">Acciones</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredDocs.map((doc) => (
+                          <TableRow key={doc.id} className="h-12">
+                            <TableCell className="py-2 font-medium">{doc.clienteNombre || "Sin cliente"}</TableCell>
+                            <TableCell className="py-2">{doc.uuid || "-"}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{statusLabels[doc.estatus] || doc.estatus}</Badge>
+                            </TableCell>
+                            <TableCell className="py-2">
+                              {(doc.total || 0).toLocaleString("es-MX", { style: "currency", currency: "MXN" })}
+                            </TableCell>
+                            <TableCell className="py-2">{doc.vendedor || "-"}</TableCell>
+                            <TableCell className="py-2 text-right">
+                              <div className="flex justify-end gap-1">
+                                <Button size="icon" variant="ghost" onClick={() => openEdit(doc)}>
+                                  <Pencil className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="text-destructive hover:text-destructive"
+                                  onClick={() => remove(doc.id)}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 )}
               </CardContent>
             </Card>

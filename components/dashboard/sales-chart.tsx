@@ -69,11 +69,11 @@ export function SalesChart() {
   }, [orders])
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Ventas Anuales</CardTitle>
+    <Card className="border-white/10 bg-white/10 text-white shadow-[0_20px_45px_rgba(15,23,42,0.35)]">
+      <CardHeader className="border-b border-white/10 pb-4">
+        <CardTitle className="text-white">Ventas Anuales</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-2">
         {loading ? (
           <Skeleton className="h-[300px] w-full" />
         ) : (
@@ -88,9 +88,9 @@ export function SalesChart() {
           >
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="month" className="text-xs" />
-                <YAxis className="text-xs" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
+                <XAxis dataKey="month" tick={{ fill: "rgba(255,255,255,0.7)", fontSize: 12 }} />
+                <YAxis tick={{ fill: "rgba(255,255,255,0.7)", fontSize: 12 }} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Line type="monotone" dataKey="ventas" stroke="var(--color-ventas)" strokeWidth={2} dot={false} />
               </LineChart>

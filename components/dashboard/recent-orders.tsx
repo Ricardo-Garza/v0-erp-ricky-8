@@ -14,7 +14,7 @@ import { OrderDetailDrawer } from "./order-detail-drawer"
 
 const statusConfig = {
   draft: { label: "Borrador", variant: "secondary" as const },
-  quotation: { label: "Cotización", variant: "secondary" as const },
+  quotation: { label: "Cotizacion", variant: "secondary" as const },
   confirmed: { label: "Confirmada", variant: "default" as const },
   in_progress: { label: "En Proceso", variant: "default" as const },
   delivered: { label: "Entregada", variant: "outline" as const },
@@ -71,14 +71,14 @@ export function RecentOrders() {
 
   return (
     <>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Órdenes Recientes</CardTitle>
-          <Button variant="outline" size="sm" onClick={handleViewAll}>
+      <Card className="border-white/10 bg-white/10 text-white shadow-[0_20px_45px_rgba(15,23,42,0.35)]">
+        <CardHeader className="flex flex-row items-center justify-between border-b border-white/10 pb-4">
+          <CardTitle className="text-white">Ordenes Recientes</CardTitle>
+          <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10" onClick={handleViewAll}>
             Ver Todas
           </Button>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-4">
           {loading ? (
             <div className="space-y-3">
               {[1, 2, 3, 4, 5].map((i) => (
@@ -87,12 +87,12 @@ export function RecentOrders() {
             </div>
           ) : recentOrders.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-                <ShoppingCart className="w-8 h-8 text-muted-foreground" />
+              <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mb-4">
+                <ShoppingCart className="w-8 h-8 text-white/70" />
               </div>
-              <p className="text-sm font-medium mb-1">Aún no hay órdenes registradas</p>
-              <p className="text-xs text-muted-foreground mb-4">Las órdenes de venta aparecerán aquí</p>
-              <Button variant="outline" size="sm" onClick={() => router.push("/dashboard/ventas/ordenes/new")}>
+              <p className="text-sm font-medium mb-1 text-white">Aun no hay ordenes registradas</p>
+              <p className="text-xs text-white/70 mb-4">Las ordenes de venta apareceran aqui</p>
+              <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10" onClick={() => router.push("/dashboard/ventas/ordenes/new")}>
                 Nueva Orden
               </Button>
             </div>
@@ -100,14 +100,14 @@ export function RecentOrders() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Folio</th>
-                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Cliente</th>
-                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Productos</th>
-                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Monto</th>
-                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Estado</th>
-                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Fecha</th>
-                    <th className="text-right py-3 px-2 text-sm font-medium text-muted-foreground">Acciones</th>
+                  <tr className="border-b border-white/10">
+                    <th className="text-left py-3 px-2 text-xs font-semibold text-white/60">Folio</th>
+                    <th className="text-left py-3 px-2 text-xs font-semibold text-white/60">Cliente</th>
+                    <th className="text-left py-3 px-2 text-xs font-semibold text-white/60">Productos</th>
+                    <th className="text-left py-3 px-2 text-xs font-semibold text-white/60">Monto</th>
+                    <th className="text-left py-3 px-2 text-xs font-semibold text-white/60">Estado</th>
+                    <th className="text-left py-3 px-2 text-xs font-semibold text-white/60">Fecha</th>
+                    <th className="text-right py-3 px-2 text-xs font-semibold text-white/60">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -117,25 +117,25 @@ export function RecentOrders() {
                     const productDisplay = productCount > 1 ? `${firstProduct} (+${productCount - 1})` : firstProduct
 
                     return (
-                      <tr key={order.id} className="border-b last:border-0 hover:bg-muted/50 transition-colors">
-                        <td className="py-3 px-2 text-sm font-medium">{order.orderNumber || "-"}</td>
-                        <td className="py-3 px-2 text-sm">{order.customerName || "-"}</td>
-                        <td className="py-3 px-2 text-sm text-muted-foreground">{productDisplay}</td>
-                        <td className="py-3 px-2 text-sm font-semibold">{formatCurrency(order.total)}</td>
+                      <tr key={order.id} className="border-b border-white/10 last:border-0 hover:bg-white/5 transition-colors">
+                        <td className="py-3 px-2 text-sm font-medium text-white">{order.orderNumber || "-"}</td>
+                        <td className="py-3 px-2 text-sm text-white/80">{order.customerName || "-"}</td>
+                        <td className="py-3 px-2 text-sm text-white/70">{productDisplay}</td>
+                        <td className="py-3 px-2 text-sm font-semibold text-white">{formatCurrency(order.total)}</td>
                         <td className="py-3 px-2">
-                          <Badge variant={statusConfig[order.status]?.variant || "secondary"}>
+                          <Badge variant="outline" className="border-white/20 text-white/80">
                             {statusConfig[order.status]?.label || order.status}
                           </Badge>
                         </td>
-                        <td className="py-3 px-2 text-sm text-muted-foreground">{formatDate(order.orderDate)}</td>
+                        <td className="py-3 px-2 text-sm text-white/70">{formatDate(order.orderDate)}</td>
                         <td className="py-3 px-2 text-right">
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => handleViewOrder(order.id)}
-                            className="hover:bg-muted"
+                            className="hover:bg-white/10"
                           >
-                            <Eye className="w-4 h-4" />
+                            <Eye className="w-4 h-4 text-white" />
                           </Button>
                         </td>
                       </tr>

@@ -40,8 +40,8 @@ export function GenerateDeliveryDialog({ salesOrder, open, onClose, onSuccess }:
   const [notes, setNotes] = useState("")
   const [stockError, setStockError] = useState<string | null>(null)
 
-  const { items: existingDeliveries } = useFirestore<Delivery>(COLLECTIONS.deliveries, companyId)
-  const { items: products } = useFirestore<Product>(COLLECTIONS.products, companyId)
+  const { items: existingDeliveries } = useFirestore<Delivery>(COLLECTIONS.deliveries, [], true)
+  const { items: products } = useFirestore<Product>(COLLECTIONS.products, [], true)
 
   const handleGenerate = async () => {
     setGenerating(true)

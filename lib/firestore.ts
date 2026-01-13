@@ -106,6 +106,7 @@ export const COLLECTIONS = {
   contractAgreements: "contractAgreements",
   reportTemplates: "reportTemplates",
   dashboardConfigs: "dashboardConfigs",
+  notifications: "notifications",
 
   payrollRuns: "payrollRuns",
   timeEntries: "timeEntries",

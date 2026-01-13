@@ -58,11 +58,11 @@ export function TopProducts() {
   }, [orders])
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Productos Más Vendidos</CardTitle>
+    <Card className="border-white/10 bg-white/10 text-white shadow-[0_20px_45px_rgba(15,23,42,0.35)]">
+      <CardHeader className="border-b border-white/10 pb-4">
+        <CardTitle className="text-white">Productos Mas Vendidos</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-2">
         {loading ? (
           <div className="space-y-4">
             {[1, 2, 3, 4, 5].map((i) => (
@@ -71,28 +71,28 @@ export function TopProducts() {
           </div>
         ) : topProducts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-              <Package className="w-8 h-8 text-muted-foreground" />
+            <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mb-4">
+              <Package className="w-8 h-8 text-white/70" />
             </div>
-            <p className="text-sm text-muted-foreground">Aún no hay ventas registradas</p>
+            <p className="text-sm text-white/70">Aun no hay ventas registradas</p>
           </div>
         ) : (
           <div className="space-y-4">
             {topProducts.map((product, index) => (
               <div key={product.name} className="flex items-center gap-4">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-sm font-bold text-cyan-200">
                   {index + 1}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">{product.name}</p>
-                  <p className="text-xs text-muted-foreground">{product.sales} unidades vendidas</p>
+                  <p className="font-medium text-sm truncate text-white">{product.name}</p>
+                  <p className="text-xs text-white/70">{product.sales} unidades vendidas</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-sm">
+                  <p className="font-semibold text-sm text-white">
                     ${(product.revenue || 0).toLocaleString("es-MX", { minimumFractionDigits: 2 })}
                   </p>
-                  <Badge variant={product.trend === "up" ? "default" : "secondary"} className="mt-1">
-                    {product.trend === "up" ? "↑" : "↓"}
+                  <Badge variant="outline" className="mt-1 border-white/20 text-white/80">
+                    {product.trend === "up" ? "?" : "?"}
                   </Badge>
                 </div>
               </div>

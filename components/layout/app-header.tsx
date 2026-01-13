@@ -1,6 +1,6 @@
 "use client"
 
-import { Bell, LogOut, Settings, UserCircle } from "lucide-react"
+import { Bell, Calendar, LogOut, Settings, UserCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -14,10 +14,25 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useAuth } from "@/contexts/auth-context"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
+import { useFirestore } from "@/hooks/use-firestore"
+import { COLLECTIONS } from "@/lib/firestore"
+
+type NotificationItem = {
+  id: string
+  title?: string
+  body?: string
+  read?: boolean
+  createdAt?: any
+}
 
 export function AppHeader() {
   const { user, logout } = useAuth()
   const pathname = usePathname()
+  const { items: notifications, update: updateNotification } = useFirestore<NotificationItem>(
+    COLLECTIONS.notifications,
+    [],
+    true,
+  )
 
   const moduleTitles: Record<string, string> = {
     "/dashboard": "Panel de Control",
@@ -73,16 +88,110 @@ export function AppHeader() {
     await logout()
   }
 
+  const unreadCount = notifications.filter((item) => !item?.read).length
+  const sortedNotifications = [...notifications].sort((a, b) => {
+    const getTime = (value?: any) => {
+      if (!value) return 0
+      if (typeof value === "string") return new Date(value).getTime()
+      if (typeof value?.toDate === "function") return value.toDate().getTime()
+      if (typeof value?.seconds === "number") return value.seconds * 1000
+      return 0
+    }
+
+    return getTime(b?.createdAt) - getTime(a?.createdAt)
+  })
+
+  const formatNotificationTime = (value?: any) => {
+    if (!value) return ""
+    if (typeof value === "string") {
+      return new Date(value).toLocaleString("es-MX")
+    }
+    if (typeof value?.toDate === "function") {
+      return value.toDate().toLocaleString("es-MX")
+    }
+    if (typeof value?.seconds === "number") {
+      return new Date(value.seconds * 1000).toLocaleString("es-MX")
+    }
+    return ""
+  }
+
+  const handleMarkRead = async (notification: NotificationItem) => {
+    if (notification.read) return
+    await updateNotification(notification.id, { read: true, readAt: new Date().toISOString() } as NotificationItem)
+  }
+
+  const handleMarkAllRead = async () => {
+    const unreadItems = notifications.filter((item) => !item?.read)
+    for (const item of unreadItems) {
+      await updateNotification(item.id, { read: true, readAt: new Date().toISOString() } as NotificationItem)
+    }
+  }
+
   return (
-    <header className="h-16 border-b bg-card px-6 flex items-center justify-between gap-4">
+    <header className="app-header h-16 border-b bg-card px-6 flex items-center justify-between gap-4">
       <div>
         <h2 className="text-lg font-semibold">{headerTitle}</h2>
       </div>
       <div className="flex items-center gap-2 ml-auto">
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full" />
+        <Button variant="ghost" size="icon" className="relative" asChild>
+          <Link href="/dashboard/calendar">
+            <Calendar className="w-5 h-5" />
+          </Link>
         </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="w-5 h-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-primary text-[10px] text-white flex items-center justify-center px-1">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-80">
+            <DropdownMenuLabel className="flex items-center justify-between">
+              <span>Notificaciones</span>
+              {unreadCount > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-xs"
+                  onClick={handleMarkAllRead}
+                >
+                  Marcar todo como leido
+                </Button>
+              )}
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {sortedNotifications.length === 0 ? (
+              <div className="px-3 py-6 text-center text-sm text-muted-foreground">
+                Sin notificaciones por ahora.
+              </div>
+            ) : (
+              <div className="max-h-80 overflow-y-auto">
+                {sortedNotifications.map((item) => (
+                  <DropdownMenuItem
+                    key={item.id}
+                    className="flex flex-col items-start gap-1 whitespace-normal"
+                    onClick={() => handleMarkRead(item)}
+                  >
+                    <div className="flex w-full items-start justify-between gap-2">
+                      <p className="text-sm font-medium text-foreground">
+                        {item.title || "Notificacion"}
+                      </p>
+                      {!item.read && <span className="mt-1 h-2 w-2 rounded-full bg-primary" />}
+                    </div>
+                    {item.body && <p className="text-xs text-muted-foreground">{item.body}</p>}
+                    {item.createdAt && (
+                      <p className="text-[11px] text-muted-foreground">{formatNotificationTime(item.createdAt)}</p>
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </div>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
