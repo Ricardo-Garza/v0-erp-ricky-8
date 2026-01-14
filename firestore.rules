@@ -19,6 +19,18 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    function userCompanyId() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.companyId;
+    }
+
+    function sameCompany(companyId) {
+      return isAuthenticated() && companyId != null && userCompanyId() == companyId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
@@ -32,7 +44,9 @@ service cloud.firestore {
 
     // Users
     match /users/{userId} {
-      allow read, write: if isOwner(userId);
+      allow read: if isOwner(userId) || sameCompany(resource.data.companyId);
+      allow create: if isOwner(userId);
+      allow update, delete: if isOwner(userId) || (isAdmin() && sameCompany(resource.data.companyId));
     }
 
     // CRM Collections

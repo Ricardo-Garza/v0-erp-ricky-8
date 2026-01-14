@@ -7,7 +7,7 @@ import dayGridPlugin from "@fullcalendar/daygrid"
 import timeGridPlugin from "@fullcalendar/timegrid"
 import listPlugin from "@fullcalendar/list"
 import interactionPlugin from "@fullcalendar/interaction"
-import { format, addHours } from "date-fns"
+import { addHours } from "date-fns"
 import { es } from "date-fns/locale"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,8 +20,8 @@ import { useFirestore } from "@/hooks/use-firestore"
 import { useAuth } from "@/hooks/use-auth"
 import { COLLECTIONS } from "@/lib/firestore"
 import type { CalendarEvent, Customer, Lead } from "@/lib/types"
-import { CalendarDays, Plus, Users, Briefcase, MapPin } from "lucide-react"
-import { serverTimestamp } from "firebase/firestore"
+import { Users, Briefcase, MapPin } from "lucide-react"
+import { serverTimestamp, where } from "firebase/firestore"
 
 const eventColorMap: Record<CalendarEvent["eventType"], string> = {
   reunion: "#38bdf8",
@@ -55,12 +55,34 @@ const toDateValue = (value: any) => {
 
 export function CalendarPage() {
   const { user } = useAuth()
+  const companyId = user?.companyId || user?.uid || ""
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingEventId, setEditingEventId] = useState<string | null>(null)
 
-  const { items: events, create, update } = useFirestore<CalendarEvent>(COLLECTIONS.calendarEvents, [], true)
-  const { items: customers } = useFirestore<Customer>(COLLECTIONS.customers, [], true)
-  const { items: leads } = useFirestore<Lead>(COLLECTIONS.leads, [], true)
+  const { items: events, create, update } = useFirestore<CalendarEvent>(
+    COLLECTIONS.calendarEvents,
+    companyId ? [where("companyId", "==", companyId)] : [],
+    true,
+    false,
+  )
+  const { items: customers } = useFirestore<Customer>(
+    COLLECTIONS.customers,
+    companyId ? [where("companyId", "==", companyId)] : [],
+    true,
+  )
+  const { items: leads } = useFirestore<Lead>(
+    COLLECTIONS.leads,
+    companyId ? [where("companyId", "==", companyId)] : [],
+    true,
+  )
+  const { items: members } = useFirestore<{ id: string; name?: string; email?: string; companyId?: string }>(
+    COLLECTIONS.users,
+    companyId ? [where("companyId", "==", companyId)] : [],
+    true,
+    false,
+  )
+
+  const memberOptions = useMemo(() => members.filter((member) => member.id !== user?.uid), [members, user?.uid])
 
   const [formData, setFormData] = useState({
     title: "",
@@ -72,6 +94,7 @@ export function CalendarPage() {
     location: "",
     clientId: "",
     leadId: "",
+    invitedUserIds: [] as string[],
   })
 
   const calendarEvents = useMemo(() => {
@@ -103,6 +126,7 @@ export function CalendarPage() {
       location: "",
       clientId: "",
       leadId: "",
+      invitedUserIds: [],
     })
     setEditingEventId(null)
   }
@@ -130,6 +154,7 @@ export function CalendarPage() {
       location: event.location || "",
       clientId: event.clientId || "",
       leadId: event.leadId || "",
+      invitedUserIds: event.invitedUserIds || [],
     })
     setEditingEventId(event.id)
     setDialogOpen(true)
@@ -140,6 +165,7 @@ export function CalendarPage() {
 
     const selectedClient = customers.find((c) => c.id === formData.clientId)
     const selectedLead = leads.find((l) => l.id === formData.leadId)
+    const invitedMembers = memberOptions.filter((member) => formData.invitedUserIds.includes(member.id))
 
     const payload = {
       title: formData.title.trim(),
@@ -153,9 +179,13 @@ export function CalendarPage() {
       clientName: selectedClient?.nombre || null,
       leadId: formData.leadId ? formData.leadId : null,
       leadName: selectedLead?.empresa || null,
+      invitedUserIds: formData.invitedUserIds,
+      invitedNames: invitedMembers.map((member) => member.name || member.email || member.id),
+      invitedEmails: invitedMembers.map((member) => member.email || ""),
+      ownerId: user?.uid || "",
       status: "programado",
       color: formData.eventType,
-      companyId: user?.companyId || user?.uid || "",
+      companyId,
       userId: user?.uid || "",
       updatedAt: serverTimestamp() as any,
     }
@@ -183,28 +213,36 @@ export function CalendarPage() {
     })
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-<div className="flex flex-wrap gap-2">
-          <Button onClick={() => openDialogForDate(new Date())}>
-            <Plus className="w-4 h-4 mr-2" />
-            Nuevo evento
-          </Button>
-        </div>
-      </div>
+  const toggleInvite = (userId: string) => {
+    setFormData((prev) => {
+      const exists = prev.invitedUserIds.includes(userId)
+      const invitedUserIds = exists
+        ? prev.invitedUserIds.filter((id) => id !== userId)
+        : [...prev.invitedUserIds, userId]
+      return { ...prev, invitedUserIds }
+    })
+  }
 
-      <div className="calendar-shell rounded-[28px] border border-white/20 bg-slate-950/95 p-4 shadow-[0_30px_80px_rgba(15,23,42,0.35)]">
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="calendar-shell h-full min-h-0 flex-1 rounded-[28px] border border-white/20 bg-slate-950/95 p-4 shadow-[0_30px_80px_rgba(15,23,42,0.35)]">
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+          customButtons={{
+            newEvent: {
+              text: "Nuevo evento",
+              click: () => openDialogForDate(new Date()),
+            },
+          }}
           headerToolbar={{
-            left: "prev,next today",
+            left: "newEvent prev,next today",
             center: "title",
             right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
           }}
           initialView="dayGridMonth"
           locale={es}
-          height="auto"
+          height="100%"
+          contentHeight="auto"
           editable
           selectable
           selectMirror
@@ -223,11 +261,11 @@ export function CalendarPage() {
           </DialogHeader>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2 md:col-span-2">
-              <Label>Título</Label>
+              <Label>Titulo</Label>
               <Input
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="Reunión comercial"
+                placeholder="Reunion comercial"
               />
             </div>
             <div className="space-y-2">
@@ -249,7 +287,7 @@ export function CalendarPage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Ubicación</Label>
+              <Label>Ubicacion</Label>
               <Input
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
@@ -277,7 +315,7 @@ export function CalendarPage() {
                 checked={formData.allDay}
                 onCheckedChange={(checked) => setFormData({ ...formData, allDay: checked })}
               />
-              <Label>Todo el día</Label>
+              <Label>Todo el dia</Label>
             </div>
             <div className="space-y-2">
               <Label>Cliente</Label>
@@ -310,11 +348,42 @@ export function CalendarPage() {
               </Select>
             </div>
             <div className="space-y-2 md:col-span-2">
-              <Label>Descripción</Label>
+              <Label>Invitados</Label>
+              {memberOptions.length === 0 ? (
+                <div className="rounded-md border border-dashed border-border px-3 py-2 text-sm text-muted-foreground">
+                  No hay usuarios para invitar en esta empresa.
+                </div>
+              ) : (
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {memberOptions.map((member) => {
+                    const label = member.name || member.email || "Usuario"
+                    const checked = formData.invitedUserIds.includes(member.id)
+                    return (
+                      <label
+                        key={member.id}
+                        className={`flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm ${
+                          checked ? "border-primary/60 bg-primary/10 text-foreground" : "border-border"
+                        }`}
+                      >
+                        <span className="truncate">{label}</span>
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleInvite(member.id)}
+                          className="h-4 w-4"
+                        />
+                      </label>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label>Descripcion</Label>
               <Input
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Notas o agenda de la reunión"
+                placeholder="Notas o agenda de la reunion"
               />
             </div>
             <div className="md:col-span-2 flex flex-wrap gap-2">
@@ -338,9 +407,7 @@ export function CalendarPage() {
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleSaveEvent}>
-              {editingEventId ? "Actualizar" : "Guardar"}
-            </Button>
+            <Button onClick={handleSaveEvent}>{editingEventId ? "Actualizar" : "Guardar"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

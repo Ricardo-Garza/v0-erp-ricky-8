@@ -4,9 +4,15 @@ import { Card, CardContent } from "@/components/ui/card"
 import { TrendingUp, TrendingDown, DollarSign, Percent, Calculator } from "lucide-react"
 import { useFinancialData } from "@/hooks/use-financial-data"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useAuth } from "@/hooks/use-auth"
 
 export function DashboardStats() {
-  const { data: financialData, loading } = useFinancialData({ useCurrentMonth: true })
+  const { user } = useAuth()
+  const { data: financialData, loading } = useFinancialData({
+    useCurrentMonth: true,
+    companyId: user?.companyId,
+    userId: user?.uid,
+  })
 
   if (loading) {
     return (

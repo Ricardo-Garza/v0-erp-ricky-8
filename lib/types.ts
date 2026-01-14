@@ -2696,6 +2696,10 @@ export interface CalendarEvent extends BaseDocument {
   eventType: "reunion" | "cita" | "tarea" | "recordatorio"
   location?: string
   attendees?: string[]
+  invitedUserIds?: string[]
+  invitedNames?: string[]
+  invitedEmails?: string[]
+  ownerId?: string
   clientId?: string
   clientName?: string
   leadId?: string

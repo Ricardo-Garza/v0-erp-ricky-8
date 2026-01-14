@@ -61,6 +61,7 @@ export function AppHeader() {
     "/dashboard/calendar": "Calendario",
     "/dashboard/settings": "Configuracion",
     "/dashboard/facturacion": "Facturacion",
+    "/dashboard/admin": "Usuarios y permisos",
   }
 
   const resolvedTitle =

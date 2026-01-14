@@ -26,11 +26,13 @@ import { useSuppliersData } from "@/hooks/use-suppliers-data"
 import { COLLECTIONS } from "@/lib/firestore"
 import { useFirestore } from "@/hooks/use-firestore"
 import { useWarehouseData } from "@/hooks/use-warehouse-data"
+import { useAuth } from "@/hooks/use-auth"
 import { Calendar } from "@/components/ui/calendar"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { getFirebaseStorage } from "@/lib/firebase"
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage"
+import { where } from "firebase/firestore"
 
 interface SupplierProductDialogProps {
   open: boolean
@@ -79,10 +81,14 @@ export function SupplierProductDialog({
 
   const { suppliers } = useSuppliersData()
   const { warehouses } = useWarehouseData()
+  const { user } = useAuth()
+  const companyId = (user as any)?.companyId || user?.uid || ""
+  const companyFilter = companyId ? [where("companyId", "==", companyId)] : []
   const { items: inventoryProducts, create: createInventoryProduct } = useFirestore<Product>(
     COLLECTIONS.products,
-    [],
+    companyFilter,
     true,
+    false,
   )
 
   const [openSupplierCombo, setOpenSupplierCombo] = useState(false)
@@ -427,9 +433,15 @@ export function SupplierProductDialog({
         claveSat: "",
         unidadSat: "",
         impuestosAplicables: [],
+        companyId,
       }
 
-      const newProductId = await createInventoryProduct(newProductData)
+      const createdProduct = await createInventoryProduct(newProductData)
+      const newProductId = createdProduct?.id
+
+      if (!newProductId) {
+        throw new Error("No se pudo crear el producto en inventario.")
+      }
 
       const newProduct: Product = {
         id: newProductId,

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -8,16 +8,34 @@ import { Badge } from "@/components/ui/badge"
 import { Search, Download, Settings2, Package } from "lucide-react"
 import { useUserPreferences } from "@/hooks/use-user-preferences"
 import { useInventoryCalculations } from "@/hooks/use-inventory-calculations"
+import { useAuth } from "@/hooks/use-auth"
 import { DemandPeriodSelector } from "@/components/inventory/demand-period-selector"
 import { ColumnConfigModal } from "@/components/inventory/column-config-modal"
 
 export function InventoryTab({ warehouseData }: { warehouseData: any }) {
   const [searchQuery, setSearchQuery] = useState("")
   const [configModalOpen, setConfigModalOpen] = useState(false)
+  const { user } = useAuth()
+  const companyId = (user as any)?.companyId || user?.uid || ""
   const { preferences, savePreferences, loading: prefsLoading } = useUserPreferences()
+  const productsWithStock = useMemo(() => {
+    const stockByProduct = new Map<string, number>()
+    ;(warehouseData.inventoryStock || []).forEach((stock: any) => {
+      const available =
+        typeof stock.cantidadDisponible === "number" ? stock.cantidadDisponible : stock.cantidadActual || 0
+      stockByProduct.set(stock.productoId, (stockByProduct.get(stock.productoId) || 0) + available)
+    })
+
+    return (warehouseData.products || []).map((product: any) => ({
+      ...product,
+      stock: stockByProduct.get(product.id) || 0,
+    }))
+  }, [warehouseData.inventoryStock, warehouseData.products])
+
   const { demandData, loading: demandLoading } = useInventoryCalculations(
-    warehouseData.products,
+    productsWithStock,
     preferences.demandPeriodDays,
+    companyId,
   )
 
   const filteredStock = (warehouseData.inventoryStock || []).filter(
@@ -28,11 +46,23 @@ export function InventoryTab({ warehouseData }: { warehouseData: any }) {
   )
 
   const handleExport = () => {
-    const headers = ["SKU", "Producto", "Almacén", "Stock", "Disponible", "Costo Promedio", "Valor Total"]
+    const headers = [
+      "SKU",
+      "Producto",
+      "Almacen",
+      "Lote/Serie",
+      "Caducidad",
+      "Stock",
+      "Disponible",
+      "Costo Promedio",
+      "Valor Total",
+    ]
     const rows = filteredStock.map((s: any) => [
       s.sku || "",
       s.productoNombre || "",
       s.almacenNombre || "",
+      s.lote || s.serie || "",
+      s.fechaCaducidad ? new Date(s.fechaCaducidad).toLocaleDateString("es-MX") : "",
       s.cantidadActual || 0,
       s.cantidadDisponible || 0,
       (s.costoPromedio || 0).toFixed(2),
@@ -110,13 +140,22 @@ export function InventoryTab({ warehouseData }: { warehouseData: any }) {
                   {cols.name && (
                     <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Producto</th>
                   )}
-                  <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Almacén</th>
+                  <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Almacen</th>
+                  {cols.lot && (
+                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Lote/Serie</th>
+                  )}
+                  {cols.expiry && (
+                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Caducidad</th>
+                  )}
+                  {cols.trace && (
+                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Trazabilidad</th>
+                  )}
                   {cols.stock && (
                     <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Stock</th>
                   )}
                   <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Disponible</th>
                   {cols.minStock && (
-                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Stock Mín.</th>
+                    <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Stock Min.</th>
                   )}
                   {cols.price && (
                     <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Costo Prom.</th>
@@ -146,6 +185,27 @@ export function InventoryTab({ warehouseData }: { warehouseData: any }) {
                       {cols.sku && <td className="py-3 px-2 text-sm font-medium">{stock.sku || "-"}</td>}
                       {cols.name && <td className="py-3 px-2 text-sm font-medium">{stock.productoNombre}</td>}
                       <td className="py-3 px-2 text-sm text-muted-foreground">{stock.almacenNombre}</td>
+                      {cols.lot && (
+                        <td className="py-3 px-2 text-sm text-muted-foreground">
+                          {stock.lote || stock.serie || "-"}
+                        </td>
+                      )}
+                      {cols.expiry && (
+                        <td className="py-3 px-2 text-sm text-muted-foreground">
+                          {stock.fechaCaducidad ? new Date(stock.fechaCaducidad).toLocaleDateString("es-MX") : "-"}
+                        </td>
+                      )}
+                      {cols.trace && (
+                        <td className="py-3 px-2">
+                          {stock.lote ? (
+                            <Badge variant="outline">Lote</Badge>
+                          ) : stock.serie ? (
+                            <Badge variant="outline">Serie</Badge>
+                          ) : (
+                            <Badge variant="secondary">N/A</Badge>
+                          )}
+                        </td>
+                      )}
                       {cols.stock && (
                         <td className="py-3 px-2">
                           <span className={`text-sm font-medium ${isLowStock ? "text-orange-600" : "text-foreground"}`}>

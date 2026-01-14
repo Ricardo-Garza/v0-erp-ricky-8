@@ -2,7 +2,7 @@ import { CalendarPage } from "@/components/calendar/calendar-page"
 
 export default function CalendarModulePage() {
   return (
-    <div className="space-y-6">
+    <div className="flex h-[calc(100vh-64px)] flex-col">
       <CalendarPage />
     </div>
   )

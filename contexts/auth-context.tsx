@@ -7,6 +7,7 @@ import { doc, getDoc } from "firebase/firestore"
 
 interface AuthUser extends FirebaseUser {
   companyId?: string
+  role?: "admin" | "user"
 }
 
 interface AuthContextType {
@@ -32,6 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log("[v0] [Auth] User authenticated:", firebaseUser.uid)
 
         let userCompanyId: string | undefined
+        let userRole: "admin" | "user" = "user"
 
         try {
           const userDocRef = doc(db, "users", firebaseUser.uid)
@@ -40,6 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (userDoc.exists()) {
             const userData = userDoc.data()
             userCompanyId = userData.companyId || userData.empresaId
+            userRole = userData.role === "admin" ? "admin" : "user"
             console.log("[v0] [Auth] CompanyId from profile:", userCompanyId)
           }
         } catch (error) {
@@ -66,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser({
           ...firebaseUser,
           companyId: userCompanyId,
+          role: userRole,
         })
         setCompanyId(userCompanyId)
       } else {

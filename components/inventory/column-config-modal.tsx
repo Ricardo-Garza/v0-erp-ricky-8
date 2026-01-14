@@ -24,12 +24,15 @@ interface ColumnConfigModalProps {
 const COLUMN_LABELS: Record<keyof InventoryTablePreferences["visibleColumns"], string> = {
   sku: "SKU",
   name: "Producto",
-  category: "Categoría",
+  category: "Categoria",
+  lot: "Lote / Serie",
+  expiry: "Caducidad",
+  trace: "Trazabilidad",
   stock: "Stock Actual",
-  minStock: "Stock Mínimo",
+  minStock: "Stock Minimo",
   price: "Precio",
   supplier: "Proveedor",
-  avgDemand: "Demanda Promedio (30 días)",
+  avgDemand: "Demanda Promedio (30 dias)",
   suggestedOrder: "Pedido Sugerido",
   status: "Estado",
 }
@@ -55,7 +58,7 @@ export function ColumnConfigModal({ open, onOpenChange, preferences, onSave }: C
       onOpenChange(false)
     } catch (error) {
       console.error("[ColumnConfig] Error saving:", error)
-      alert("Error al guardar la configuración")
+      alert("Error al guardar la configuracion")
     } finally {
       setSaving(false)
     }
@@ -67,6 +70,9 @@ export function ColumnConfigModal({ open, onOpenChange, preferences, onSave }: C
         sku: true,
         name: true,
         category: true,
+        lot: false,
+        expiry: false,
+        trace: false,
         stock: true,
         minStock: true,
         price: true,
@@ -75,6 +81,7 @@ export function ColumnConfigModal({ open, onOpenChange, preferences, onSave }: C
         suggestedOrder: true,
         status: true,
       },
+      demandPeriodDays: 30,
     }
     setLocalPreferences(defaultPrefs)
   }
@@ -107,7 +114,7 @@ export function ColumnConfigModal({ open, onOpenChange, preferences, onSave }: C
             Restablecer
           </Button>
           <Button onClick={handleSave} disabled={saving}>
-            {saving ? "Guardando..." : "Guardar Configuración"}
+            {saving ? "Guardando..." : "Guardar Configuracion"}
           </Button>
         </DialogFooter>
       </DialogContent>

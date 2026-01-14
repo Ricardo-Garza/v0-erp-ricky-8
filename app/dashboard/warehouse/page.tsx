@@ -66,7 +66,7 @@ export default function WarehousePage() {
           <TabsTrigger value="warehouses">Almacenes</TabsTrigger>
           <TabsTrigger value="movements">Movimientos</TabsTrigger>
           <TabsTrigger value="transfers">Transferencias</TabsTrigger>
-          <TabsTrigger value="physical">Inv. Físico</TabsTrigger>
+          <TabsTrigger value="physical">Inv. Fisico</TabsTrigger>
           <TabsTrigger value="reports">Reportes</TabsTrigger>
         </TabsList>
 
@@ -97,3 +97,4 @@ export default function WarehousePage() {
     </div>
   )
 }
+

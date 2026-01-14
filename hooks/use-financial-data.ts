@@ -1,14 +1,16 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Timestamp } from "firebase/firestore"
+import { Timestamp, where } from "firebase/firestore"
 import { getItems, COLLECTIONS } from "@/lib/firestore"
-import type { Order, Purchase, Expense, InventorySnapshot, FinancialPeriod } from "@/lib/types"
+import type { SalesOrder, Purchase, Expense, InventorySnapshot, InventoryStock, FinancialPeriod } from "@/lib/types"
 
 interface UseFinancialDataOptions {
   periodStart?: Date
   periodEnd?: Date
   useCurrentMonth?: boolean
+  companyId?: string
+  userId?: string
 }
 
 export function useFinancialData(options: UseFinancialDataOptions = {}) {
@@ -46,22 +48,32 @@ export function useFinancialData(options: UseFinancialDataOptions = {}) {
         periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
       }
 
-      const allOrders = await getItems<Order>(COLLECTIONS.orders, [])
+      const constraints = options.companyId
+        ? [where("companyId", "==", options.companyId)]
+        : options.userId
+          ? [where("userId", "==", options.userId)]
+          : []
+
+      const allOrders = await getItems<SalesOrder>(COLLECTIONS.salesOrders, constraints)
 
       const periodOrders = (allOrders || []).filter((order) => {
-        if (!order.status || (order.status !== "completed" && order.status !== "processing")) {
+        if (
+          !order.status ||
+          !["confirmed", "in_progress", "delivered", "invoiced", "invoiced_partial"].includes(order.status)
+        ) {
           return false
         }
 
-        if (!order.date) return false
+        if (!order.orderDate) return false
 
-        const orderDate = order.date instanceof Timestamp ? order.date.toDate() : new Date(order.date)
+        const orderDate =
+          order.orderDate instanceof Timestamp ? order.orderDate.toDate() : new Date(order.orderDate)
         return orderDate >= periodStart && orderDate <= periodEnd
       })
 
       const totalRevenue = periodOrders.reduce((sum, order) => sum + (order.total || 0), 0)
 
-      const allPurchases = await getItems<Purchase>(COLLECTIONS.purchases, [])
+      const allPurchases = await getItems<Purchase>(COLLECTIONS.purchases, constraints)
 
       const periodPurchases = (allPurchases || []).filter((purchase) => {
         if (!purchase.status || purchase.status !== "completed") return false
@@ -73,7 +85,7 @@ export function useFinancialData(options: UseFinancialDataOptions = {}) {
 
       const totalPurchases = periodPurchases.reduce((sum, purchase) => sum + (purchase.amount || 0), 0)
 
-      const allExpenses = await getItems<Expense>(COLLECTIONS.expenses, [])
+      const allExpenses = await getItems<Expense>(COLLECTIONS.expenses, constraints)
 
       const periodExpenses = (allExpenses || []).filter((expense) => {
         if (!expense.status || expense.status !== "paid") return false
@@ -86,7 +98,7 @@ export function useFinancialData(options: UseFinancialDataOptions = {}) {
       const totalOpex = periodExpenses.reduce((sum, expense) => sum + (expense.amount || 0), 0)
 
       const periodKey = `${periodStart.getFullYear()}-${String(periodStart.getMonth() + 1).padStart(2, "0")}`
-      const allSnapshots = await getItems<InventorySnapshot>(COLLECTIONS.inventorySnapshots, [])
+      const allSnapshots = await getItems<InventorySnapshot>(COLLECTIONS.inventorySnapshots, constraints)
 
       const snapshots = (allSnapshots || []).filter((s) => s.period === periodKey)
 
@@ -108,8 +120,11 @@ export function useFinancialData(options: UseFinancialDataOptions = {}) {
           openingInventory = prevSnapshots[0].closingValue || 0
         }
 
-        const products = await getItems<any>(COLLECTIONS.products, [])
-        closingInventory = (products || []).reduce((sum, p) => sum + (p.cost || 0) * (p.stock || 0), 0)
+        const inventory = await getItems<InventoryStock>(COLLECTIONS.inventoryStock, constraints)
+        closingInventory = (inventory || []).reduce(
+          (sum, item) => sum + (item.cantidadActual || 0) * (item.costoPromedio || 0),
+          0,
+        )
       }
 
       const cogs = Math.max(0, openingInventory + totalPurchases - closingInventory)

@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { useAuth } from "@/hooks/use-auth"
 import {
   LayoutDashboard,
   Building2,
@@ -72,6 +73,7 @@ const sections = [
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const { user } = useAuth()
 
   const isRouteActive = (href: string) => {
     if (href === "/dashboard") {
@@ -98,10 +100,18 @@ export function AppSidebar() {
       </div>
 
       <nav className="flex-1 p-4 space-y-6">
-        {sections.map((section) => (
+        {sections.map((section) => {
+          const items = section.title === "ADMINISTRACION"
+            ? section.items.concat(
+                user?.role === "admin"
+                  ? [{ name: "Usuarios y permisos", href: "/dashboard/admin/users", icon: Users }]
+                  : [],
+              )
+            : section.items
+          return (
           <div key={section.title} className="space-y-1">
             <p className="text-xs font-semibold text-muted-foreground px-3 mb-2">{section.title}</p>
-            {section.items.map((item) => {
+            {items.map((item) => {
               const isActive = isRouteActive(item.href)
               return (
                 <Link
@@ -120,7 +130,8 @@ export function AppSidebar() {
               )
             })}
           </div>
-        ))}
+          )
+        })}
       </nav>
 
       <div className="app-sidebar-surface p-4 border-t border-border sticky bottom-0 bg-card">

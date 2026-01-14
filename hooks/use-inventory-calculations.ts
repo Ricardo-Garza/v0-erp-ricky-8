@@ -8,11 +8,13 @@ import { getFirebaseDb } from "@/lib/firebase"
 interface Order {
   id: string
   status: string
-  items: Array<{
+  lines: Array<{
     productId: string
     quantity: number
   }>
+  companyId?: string
   createdAt?: Timestamp
+  orderDate?: Timestamp
 }
 
 interface Product {
@@ -27,17 +29,17 @@ export interface ProductDemandData {
   suggestedOrderLevel: "safe" | "warning" | "critical"
 }
 
-const DEFAULT_LEAD_TIME = 5 // días
+const DEFAULT_LEAD_TIME = 5 // dias
 const SAFETY_FACTOR = 3 // 3x demanda promedio para stock de seguridad
 const CRITICAL_THRESHOLD = 50 // unidades
 
-export function useInventoryCalculations(products: Product[], demandPeriodDays = 30) {
+export function useInventoryCalculations(products: Product[], demandPeriodDays = 30, companyId?: string) {
   const [demandData, setDemandData] = useState<Record<string, ProductDemandData>>({})
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     calculateDemand()
-  }, [products, demandPeriodDays])
+  }, [products, demandPeriodDays, companyId])
 
   const calculateDemand = async () => {
     if (products.length === 0) {
@@ -47,13 +49,17 @@ export function useInventoryCalculations(products: Product[], demandPeriodDays =
 
     try {
       const db = getFirebaseDb()
-      const ordersRef = collection(db, COLLECTIONS.orders)
+      const ordersRef = collection(db, COLLECTIONS.salesOrders)
 
-      // Obtener órdenes de los últimos demandPeriodDays días
+      // Obtener ordenes de los ultimos demandPeriodDays dias
       const periodStart = new Date()
       periodStart.setDate(periodStart.getDate() - demandPeriodDays)
 
-      const q = query(ordersRef, where("status", "in", ["completed", "delivered", "dispatched"]))
+      const constraints = [where("status", "in", ["completed", "delivered", "dispatched"])]
+      if (companyId) {
+        constraints.push(where("companyId", "==", companyId))
+      }
+      const q = query(ordersRef, ...constraints)
 
       const ordersSnapshot = await getDocs(q)
       const orders = ordersSnapshot.docs.map((doc) => ({
@@ -61,19 +67,20 @@ export function useInventoryCalculations(products: Product[], demandPeriodDays =
         ...doc.data(),
       })) as Order[]
 
-      // Filtrar órdenes de los últimos demandPeriodDays días
+      // Filtrar ordenes de los ultimos demandPeriodDays dias
       const recentOrders = orders.filter((order) => {
-        if (!order.createdAt) return false
-        const orderDate = order.createdAt.toDate()
+        const baseDate = order.createdAt || order.orderDate
+        if (!baseDate) return false
+        const orderDate = baseDate.toDate()
         return orderDate >= periodStart
       })
 
-      // Calcular demanda por producto
+      // Calcular metricas para cada producto
       const productDemand: Record<string, number> = {}
 
       recentOrders.forEach((order) => {
-        if (Array.isArray(order.items)) {
-          order.items.forEach((item) => {
+        if (Array.isArray(order.lines)) {
+          order.lines.forEach((item) => {
             if (item.productId && item.quantity) {
               productDemand[item.productId] = (productDemand[item.productId] || 0) + item.quantity
             }
@@ -81,7 +88,7 @@ export function useInventoryCalculations(products: Product[], demandPeriodDays =
         }
       })
 
-      // Calcular métricas para cada producto
+      // Calcular metricas para cada producto
       const calculatedData: Record<string, ProductDemandData> = {}
 
       products.forEach((product) => {
@@ -93,7 +100,7 @@ export function useInventoryCalculations(products: Product[], demandPeriodDays =
         const reorderPoint = avgDemand * leadTime + safetyStock
         const currentStock = product.stock || 0
 
-        // Pedido Sugerido = max((Demanda × LeadTime + Stock Seguridad) - Inventario, 0)
+        // Pedido Sugerido = max((Demanda - LeadTime + Stock Seguridad) - Inventario, 0)
         const suggestedOrder = Math.max(reorderPoint - currentStock, 0)
 
         let level: "safe" | "warning" | "critical" = "safe"
@@ -123,3 +130,10 @@ export function useInventoryCalculations(products: Product[], demandPeriodDays =
     loading: loading,
   }
 }
+
+
+
+
+
+
+

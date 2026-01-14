@@ -10,6 +10,9 @@ export interface InventoryTablePreferences {
     sku: boolean
     name: boolean
     category: boolean
+    lot: boolean
+    expiry: boolean
+    trace: boolean
     stock: boolean
     minStock: boolean
     price: boolean
@@ -26,6 +29,9 @@ const DEFAULT_PREFERENCES: InventoryTablePreferences = {
     sku: true,
     name: true,
     category: true,
+    lot: false,
+    expiry: false,
+    trace: false,
     stock: true,
     minStock: true,
     price: true,
@@ -61,7 +67,15 @@ export function useUserPreferences() {
       const prefsSnap = await getDoc(prefsRef)
 
       if (prefsSnap.exists()) {
-        setPreferences(prefsSnap.data() as InventoryTablePreferences)
+        const data = prefsSnap.data() as InventoryTablePreferences
+        setPreferences({
+          ...DEFAULT_PREFERENCES,
+          ...data,
+          visibleColumns: {
+            ...DEFAULT_PREFERENCES.visibleColumns,
+            ...(data?.visibleColumns || {}),
+          },
+        })
       } else {
         setPreferences(DEFAULT_PREFERENCES)
       }

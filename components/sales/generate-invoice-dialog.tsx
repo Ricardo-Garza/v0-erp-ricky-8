@@ -79,7 +79,7 @@ export function GenerateInvoiceDialog({ salesOrder, open, onClose, onSuccess }: 
         paymentMethod: salesOrder.paymentMethod || "",
         paymentStatus: "unpaid",
         amountPaid: 0,
-        cfdiUse: salesOrder.cfdiUse,
+        cfdiUse: salesOrder.cfdiUse || "G03",
         metodoPago,
         formaPago: salesOrder.paymentMethod || "",
         lines: salesOrder.lines,
@@ -163,33 +163,35 @@ export function GenerateInvoiceDialog({ salesOrder, open, onClose, onSuccess }: 
             <Input value={salesOrder.customerName} disabled />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="space-y-2 min-w-0">
               <Label>RFC del Cliente *</Label>
               <Input
                 value={customerRFC}
                 onChange={(e) => setCustomerRFC(e.target.value.toUpperCase())}
                 placeholder="XAXX010101000"
                 maxLength={13}
+                className="w-full min-w-0"
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label>Email del Cliente</Label>
               <Input
                 type="email"
                 value={customerEmail}
                 onChange={(e) => setCustomerEmail(e.target.value)}
                 placeholder="cliente@example.com"
+                className="w-full min-w-0"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="space-y-2 min-w-0">
               <Label>Método de Pago</Label>
               <Select value={metodoPago} onValueChange={setMetodoPago}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full min-w-0">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -199,9 +201,9 @@ export function GenerateInvoiceDialog({ salesOrder, open, onClose, onSuccess }: 
               </Select>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label>Forma de Pago</Label>
-              <Input value={salesOrder.paymentMethod || ""} disabled />
+              <Input value={salesOrder.paymentMethod || ""} disabled className="w-full min-w-0" />
             </div>
           </div>
 

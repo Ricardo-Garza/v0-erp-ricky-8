@@ -82,15 +82,15 @@ export function WarehousesTab({ warehouseData }: { warehouseData: any }) {
   const handleSave = async () => {
     try {
       if (!formData.nombre || formData.nombre.trim() === "") {
-        alert("El nombre del almacén es obligatorio")
+        alert("El nombre del almacen es obligatorio")
         return
       }
       if (!formData.codigo || formData.codigo.trim() === "") {
-        alert("El código del almacén es obligatorio")
+        alert("El codigo del almacen es obligatorio")
         return
       }
       if (!formData.ubicacion || formData.ubicacion.trim() === "") {
-        alert("La ubicación del almacén es obligatoria")
+        alert("La ubicacion del almacen es obligatoria")
         return
       }
 
@@ -105,12 +105,12 @@ export function WarehousesTab({ warehouseData }: { warehouseData: any }) {
       setIsDialogOpen(false)
     } catch (error) {
       console.error("Error saving warehouse:", error)
-      alert(error instanceof Error ? error.message : "Error al guardar el almacén")
+      alert(error instanceof Error ? error.message : "Error al guardar el almacen")
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (confirm("¿Estás seguro de eliminar este almacén?")) {
+    if (confirm("Estas seguro de eliminar este almacen?")) {
       try {
         await removeWarehouse(id)
       } catch (error) {
@@ -123,10 +123,10 @@ export function WarehousesTab({ warehouseData }: { warehouseData: any }) {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Catálogo de Almacenes</CardTitle>
+          <CardTitle>Catalogo de Almacenes</CardTitle>
           <Button onClick={() => handleOpenDialog()}>
             <Plus className="w-4 h-4 mr-2" />
-            Nuevo Almacén
+            Nuevo Almacen
           </Button>
         </div>
         <div className="flex items-center gap-2 mt-4">
@@ -158,7 +158,7 @@ export function WarehousesTab({ warehouseData }: { warehouseData: any }) {
             {warehouses.length === 0 && (
               <Button onClick={() => handleOpenDialog()} variant="outline" className="mt-4">
                 <Plus className="w-4 h-4 mr-2" />
-                Crear primer almacén
+                Crear primer almacen
               </Button>
             )}
           </div>
@@ -166,9 +166,9 @@ export function WarehousesTab({ warehouseData }: { warehouseData: any }) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Código</TableHead>
+                <TableHead>Codigo</TableHead>
                 <TableHead>Nombre</TableHead>
-                <TableHead>Ubicación</TableHead>
+                <TableHead>Ubicacion</TableHead>
                 <TableHead>Tipo</TableHead>
                 <TableHead>Productos</TableHead>
                 <TableHead>Valor Inventario</TableHead>
@@ -215,14 +215,14 @@ export function WarehousesTab({ warehouseData }: { warehouseData: any }) {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{editingWarehouse ? "Editar Almacén" : "Nuevo Almacén"}</DialogTitle>
+            <DialogTitle>{editingWarehouse ? "Editar Almacen" : "Nuevo Almacen"}</DialogTitle>
             <DialogDescription>
-              {editingWarehouse ? "Actualiza la información del almacén" : "Registra un nuevo almacén"}
+              {editingWarehouse ? "Actualiza la informacion del almacen" : "Registra un nuevo almacen"}
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Código *</Label>
+              <Label>Codigo *</Label>
               <Input
                 value={formData.codigo}
                 onChange={(e) => setFormData({ ...formData, codigo: e.target.value })}
@@ -235,12 +235,12 @@ export function WarehousesTab({ warehouseData }: { warehouseData: any }) {
               <Input
                 value={formData.nombre}
                 onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                placeholder="Almacén Principal"
+                placeholder="Almacen Principal"
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label>Ubicación *</Label>
+              <Label>Ubicacion *</Label>
               <Input
                 value={formData.ubicacion}
                 onChange={(e) => setFormData({ ...formData, ubicacion: e.target.value })}
@@ -257,8 +257,8 @@ export function WarehousesTab({ warehouseData }: { warehouseData: any }) {
                 <SelectContent>
                   <SelectItem value="principal">Principal</SelectItem>
                   <SelectItem value="sucursal">Sucursal</SelectItem>
-                  <SelectItem value="consignacion">Consignación</SelectItem>
-                  <SelectItem value="transito">Tránsito</SelectItem>
+                  <SelectItem value="consignacion">Consignacion</SelectItem>
+                  <SelectItem value="transito">Transito</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -278,7 +278,7 @@ export function WarehousesTab({ warehouseData }: { warehouseData: any }) {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Capacidad Máxima</Label>
+              <Label>Capacidad Maxima</Label>
               <Input
                 type="number"
                 value={formData.capacidadMaxima}
@@ -287,7 +287,7 @@ export function WarehousesTab({ warehouseData }: { warehouseData: any }) {
               />
             </div>
             <div className="space-y-2 col-span-2">
-              <Label>Dirección</Label>
+              <Label>Direccion</Label>
               <Input
                 value={formData.direccion}
                 onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
@@ -299,11 +299,11 @@ export function WarehousesTab({ warehouseData }: { warehouseData: any }) {
               <Input
                 value={formData.responsable}
                 onChange={(e) => setFormData({ ...formData, responsable: e.target.value })}
-                placeholder="Juan Pérez"
+                placeholder="Juan Perez"
               />
             </div>
             <div className="space-y-2">
-              <Label>Teléfono</Label>
+              <Label>Telefono</Label>
               <Input
                 value={formData.telefono}
                 onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}

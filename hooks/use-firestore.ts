@@ -17,6 +17,7 @@ export function useFirestore<T extends { id: string }>(
   collectionName: CollectionName,
   constraints: QueryConstraint[] = [],
   realtime = true,
+  userScoped = true,
 ) {
   const [items, setItems] = useState<T[]>([])
   const [loading, setLoading] = useState(true)
@@ -32,7 +33,7 @@ export function useFirestore<T extends { id: string }>(
       return
     }
 
-    const userConstraints = [where("userId", "==", currentUser.uid), ...constraints]
+    const userConstraints = userScoped ? [where("userId", "==", currentUser.uid), ...constraints] : constraints
 
     if (realtime) {
       const unsubscribe = subscribeToCollection<T>(
@@ -65,7 +66,7 @@ export function useFirestore<T extends { id: string }>(
           throw new Error("Usuario no autenticado")
         }
 
-        const finalConstraints = userConstraints || [where("userId", "==", currentUser.uid), ...constraints]
+        const finalConstraints = userConstraints || (userScoped ? [where("userId", "==", currentUser.uid), ...constraints] : constraints)
         const data = await firestoreGetItems<T>(collectionName, finalConstraints)
         const sanitized = Array.isArray(data) ? data.filter((item) => item && typeof item === "object") : []
         setItems(sanitized)

@@ -5,12 +5,13 @@ import { useFirestore } from "./use-firestore"
 import { useAuth } from "./use-auth"
 import { COLLECTIONS } from "@/lib/firestore"
 import type { Warehouse, StockMovement, WarehouseTransfer, PhysicalCount, ReorderRule, Product } from "@/lib/types"
-import { orderBy } from "firebase/firestore"
+import { orderBy, where } from "firebase/firestore"
 import { calculateInventoryFromLedger, selectLotsFIFO } from "@/lib/utils/inventory-ledger"
 
 export function useWarehouseData() {
   const { user } = useAuth()
   const companyId = user?.companyId || user?.uid || ""
+  const companyFilter = companyId ? [where("companyId", "==", companyId)] : []
 
   console.log("[v0] useWarehouseData: Initializing with companyId:", companyId)
 
@@ -20,7 +21,12 @@ export function useWarehouseData() {
     create: createWarehouseBase,
     update: updateWarehouse,
     remove: removeWarehouse,
-  } = useFirestore<Warehouse>(COLLECTIONS.warehouses, [orderBy("nombre", "asc")], true)
+  } = useFirestore<Warehouse>(
+    COLLECTIONS.warehouses,
+    [...companyFilter, orderBy("nombre", "asc")],
+    true,
+    false,
+  )
 
   const {
     items: stockMovements,
@@ -28,7 +34,12 @@ export function useWarehouseData() {
     create: createMovementBase,
     update: updateMovement,
     remove: removeMovement,
-  } = useFirestore<StockMovement>(COLLECTIONS.stockMovements, [orderBy("fecha", "desc")], true)
+  } = useFirestore<StockMovement>(
+    COLLECTIONS.stockMovements,
+    [...companyFilter, orderBy("fecha", "desc")],
+    true,
+    false,
+  )
 
   const {
     items: transfers,
@@ -36,7 +47,12 @@ export function useWarehouseData() {
     create: createTransferBase,
     update: updateTransferBase,
     remove: removeTransfer,
-  } = useFirestore<WarehouseTransfer>(COLLECTIONS.warehouseTransfers, [orderBy("fechaSolicitud", "desc")], true)
+  } = useFirestore<WarehouseTransfer>(
+    COLLECTIONS.warehouseTransfers,
+    [...companyFilter, orderBy("fechaSolicitud", "desc")],
+    true,
+    false,
+  )
 
   const {
     items: physicalCounts,
@@ -44,7 +60,12 @@ export function useWarehouseData() {
     create: createPhysicalCountBase,
     update: updatePhysicalCountBase,
     remove: removePhysicalCount,
-  } = useFirestore<PhysicalCount>(COLLECTIONS.physicalCounts, [orderBy("fechaConteo", "desc")], true)
+  } = useFirestore<PhysicalCount>(
+    COLLECTIONS.physicalCounts,
+    [...companyFilter, orderBy("fechaConteo", "desc")],
+    true,
+    false,
+  )
 
   const {
     items: reorderRules,
@@ -52,12 +73,18 @@ export function useWarehouseData() {
     create: createReorderRule,
     update: updateReorderRule,
     remove: removeReorderRule,
-  } = useFirestore<ReorderRule>(COLLECTIONS.reorderRules, [orderBy("productoNombre", "asc")], true)
+  } = useFirestore<ReorderRule>(
+    COLLECTIONS.reorderRules,
+    [...companyFilter, orderBy("productoNombre", "asc")],
+    true,
+    false,
+  )
 
   const { items: products, loading: loadingProducts } = useFirestore<Product>(
     COLLECTIONS.products,
-    [orderBy("name", "asc")],
+    [...companyFilter, orderBy("name", "asc")],
     true,
+    false,
   )
 
   const loading =
@@ -78,13 +105,13 @@ export function useWarehouseData() {
   const createWarehouse = useCallback(
     async (data: Omit<Warehouse, "id" | "createdAt" | "updatedAt" | "companyId" | "userId">) => {
       if (!data.nombre || data.nombre.trim() === "") {
-        throw new Error("El nombre del almacén es obligatorio")
+        throw new Error("El nombre del almacen es obligatorio")
       }
       if (!data.codigo || data.codigo.trim() === "") {
-        throw new Error("El código del almacén es obligatorio")
+        throw new Error("El codigo del almacen es obligatorio")
       }
       if (!data.ubicacion || data.ubicacion.trim() === "") {
-        throw new Error("La ubicación del almacén es obligatoria")
+        throw new Error("La ubicacion del almacen es obligatoria")
       }
 
       console.log("[v0] Creating warehouse with companyId:", companyId)
@@ -356,7 +383,7 @@ export function useWarehouseData() {
               cantidadAnterior: systemQty,
               cantidadNueva: countedQty,
               fecha: new Date().toISOString(),
-              motivo: `Ajuste por conteo físico ${count.folioConteo}`,
+              motivo: `Ajuste por conteo fisico ${count.folioConteo}`,
               referencia: count.folioConteo,
             })
           }

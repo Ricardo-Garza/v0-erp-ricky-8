@@ -413,3 +413,38 @@ body.crm-shell {
   background: rgba(148, 163, 184, 0.12);
   color: #e2e8f0;
 }
+
+.calendar-shell .fc {
+  border: none;
+}
+.calendar-shell .fc-scrollgrid,
+.calendar-shell .fc-scrollgrid table,
+.calendar-shell .fc-scrollgrid-section,
+.calendar-shell .fc-scrollgrid-section-header,
+.calendar-shell .fc-scrollgrid-section-body,
+.calendar-shell .fc-scroller-harness,
+.calendar-shell .fc-scroller {
+  border: none !important;
+}
+.calendar-shell .fc-view-harness {
+  height: 100% !important;
+}
+.calendar-shell .fc-scroller {
+  overflow: hidden !important;
+}
+.calendar-shell .fc-daygrid-day {
+  min-height: 120px;
+}
+.calendar-shell .fc-daygrid-day-frame {
+  padding: 10px;
+  border-radius: 12px;
+}
+.calendar-shell .fc-daygrid-day-number {
+  font-size: 0.9rem;
+  padding: 6px;
+}
+.calendar-shell .fc-col-header-cell-cushion {
+  font-size: 0.8rem;
+  padding: 6px 0;
+}
+

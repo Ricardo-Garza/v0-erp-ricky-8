@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useFirestore } from "@/hooks/use-firestore"
 import { useAuth } from "@/hooks/use-auth"
+import { useWarehouseData } from "@/hooks/use-warehouse-data"
 import { toast } from "@/hooks/use-toast"
 import { COLLECTIONS } from "@/lib/firestore"
 import { calculateLineTotal, formatCurrency } from "@/lib/utils/sales-calculations"
@@ -22,16 +23,21 @@ import {
   CreditCard,
   Sparkles,
 } from "lucide-react"
-import { serverTimestamp } from "firebase/firestore"
+import { serverTimestamp, where } from "firebase/firestore"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-interface Product {
+interface ProductBase {
   id: string
   sku?: string
   name: string
   category?: string
-  stock: number
   price: number
   imageUrl?: string
+  baseUnit?: string
+}
+
+interface ProductWithStock extends ProductBase {
+  stock: number
 }
 
 interface CartLine {
@@ -48,35 +54,81 @@ const TAX_RATE = 0.16
 
 export function PosPage() {
   const { user } = useAuth()
-  const { items: products, loading, update: updateProduct } = useFirestore<Product>(COLLECTIONS.products, [], true)
+  const companyId = (user as any)?.companyId || user?.uid || ""
+  const { warehouses, inventoryStock, createMovement, selectLotsForFulfillment } = useWarehouseData()
+
+  const { items: products, loading } = useFirestore<ProductBase>(
+    COLLECTIONS.products,
+    companyId ? [where("companyId", "==", companyId)] : [],
+    true,
+    false,
+  )
   const { create: createSale } = useFirestore<any>(COLLECTIONS.salesOrders, [], true)
   const [search, setSearch] = useState("")
   const [activeCategory, setActiveCategory] = useState("Todos")
   const [cartLines, setCartLines] = useState<CartLine[]>([])
+  const [selectedWarehouseId, setSelectedWarehouseId] = useState("")
+
+  useEffect(() => {
+    if (!selectedWarehouseId && warehouses.length > 0) {
+      setSelectedWarehouseId(warehouses[0].id)
+    }
+  }, [warehouses, selectedWarehouseId])
+
+  const selectedWarehouse = useMemo(() => {
+    return warehouses.find((warehouse) => warehouse.id === selectedWarehouseId)
+  }, [warehouses, selectedWarehouseId])
+
+  const stockByProduct = useMemo(() => {
+    const map = new Map<string, number>()
+    const filtered = selectedWarehouseId
+      ? inventoryStock.filter((s: any) => s.almacenId === selectedWarehouseId)
+      : inventoryStock
+
+    filtered.forEach((stock: any) => {
+      const available =
+        typeof stock.cantidadDisponible === "number" ? stock.cantidadDisponible : stock.cantidadActual || 0
+      map.set(stock.productoId, (map.get(stock.productoId) || 0) + available)
+    })
+
+    return map
+  }, [inventoryStock, selectedWarehouseId])
+
+  const productsWithStock = useMemo(() => {
+    return (products || []).map((product) => ({
+      ...product,
+      stock: stockByProduct.get(product.id) || 0,
+    }))
+  }, [products, stockByProduct])
 
   const categories = useMemo(() => {
     const unique = new Set<string>()
-    products.forEach((product) => {
+    productsWithStock.forEach((product) => {
       if (product?.category) unique.add(product.category)
     })
     return ["Todos", ...Array.from(unique).sort((a, b) => a.localeCompare(b, "es-MX"))]
-  }, [products])
+  }, [productsWithStock])
 
   const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
+    return productsWithStock.filter((product) => {
       const matchesSearch =
         product?.name?.toLowerCase().includes(search.toLowerCase()) ||
         product?.sku?.toLowerCase().includes(search.toLowerCase())
       const matchesCategory = activeCategory === "Todos" || product?.category === activeCategory
       return matchesSearch && matchesCategory
     })
-  }, [products, search, activeCategory])
+  }, [productsWithStock, search, activeCategory])
 
   const subtotal = cartLines.reduce((sum, line) => sum + line.price * line.quantity, 0)
   const taxes = subtotal * TAX_RATE
   const total = subtotal + taxes
 
-  const handleAddToCart = (product: Product) => {
+  const handleAddToCart = (product: ProductWithStock) => {
+    if (!selectedWarehouseId) {
+      toast({ title: "Selecciona un almacen", description: "Debes elegir un almacen para surtir la venta." })
+      return
+    }
+
     if (product.stock <= 0) {
       toast({ title: "Producto agotado", description: `${product.name} no tiene stock disponible.` })
       return
@@ -139,7 +191,12 @@ export function PosPage() {
       toast({ title: "Sesion requerida", description: "Inicia sesion para registrar la venta." })
       return
     }
+    if (!selectedWarehouseId || !selectedWarehouse) {
+      toast({ title: "Selecciona un almacen", description: "Debes elegir un almacen para surtir la venta." })
+      return
+    }
 
+    const orderNumber = `POS-${Date.now()}`
     const lines = cartLines.map((line, index) =>
       calculateLineTotal({
         id: `${line.id}-${index}`,
@@ -156,14 +213,23 @@ export function PosPage() {
       }),
     )
 
-    const orderNumber = `POS-${Date.now()}`
-    const companyId = (user as any).companyId || user.uid
-
     try {
-      await createSale({
+      for (const line of cartLines) {
+        const lotsAssigned = selectLotsForFulfillment(selectedWarehouseId, line.id, line.quantity)
+        const totalAvailable = lotsAssigned.reduce((sum, lot) => sum + (lot.cantidad || 0), 0)
+        if (totalAvailable < line.quantity) {
+          toast({
+            title: "Stock insuficiente",
+            description: `No hay inventario suficiente para ${line.name}.`,
+          })
+          return
+        }
+      }
+
+      const sale = await createSale({
         orderNumber,
         type: "order",
-        status: "confirmed",
+        status: "delivered",
         customerId: "walk-in",
         customerName: "Venta mostrador",
         currency: "MXN",
@@ -176,19 +242,47 @@ export function PosPage() {
         paymentTerms: "Contado",
         paymentMethod: "Efectivo",
         orderDate: serverTimestamp(),
+        deliveredDate: serverTimestamp(),
+        warehouseId: selectedWarehouseId,
+        warehouseName: selectedWarehouse.nombre,
         deliveryIds: [],
         invoiceIds: [],
         companyId,
         userId: user.uid,
       })
 
-      await Promise.all(
-        cartLines.map((line) =>
-          updateProduct(line.id, {
-            stock: Math.max(line.stock - line.quantity, 0),
-          }),
-        ),
-      )
+      const saleId = sale?.id || orderNumber
+
+      for (const line of cartLines) {
+        const product = productsWithStock.find((p) => p.id === line.id)
+        const lotsAssigned = selectLotsForFulfillment(selectedWarehouseId, line.id, line.quantity)
+
+        for (const lotAssigned of lotsAssigned) {
+          await createMovement({
+            folio: `POS-${orderNumber}-${line.id.slice(0, 6)}-${lotAssigned.lote || "SL"}`,
+            almacenId: selectedWarehouseId,
+            almacenNombre: selectedWarehouse.nombre,
+            productoId: line.id,
+            productoNombre: line.name,
+            sku: product?.sku || "",
+            unidadBase: product?.baseUnit || "PZA",
+            tipo: "venta",
+            cantidad: lotAssigned.cantidad,
+            cantidadAnterior: 0,
+            cantidadNueva: 0,
+            costoUnitario: lotAssigned.costoUnitario,
+            fecha: new Date().toISOString(),
+            motivo: `Venta POS ${orderNumber}`,
+            referencia: orderNumber,
+            clienteId: "walk-in",
+            clienteNombre: "Venta mostrador",
+            ordenVentaId: saleId,
+            ordenVentaFolio: orderNumber,
+            lote: lotAssigned.lote || null,
+            fechaCaducidad: lotAssigned.fechaCaducidad || null,
+          })
+        }
+      }
 
       toast({ title: "Venta registrada", description: `Folio ${orderNumber}` })
       setCartLines([])
@@ -210,6 +304,21 @@ export function PosPage() {
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground">Ticket activo con productos del inventario.</p>
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-medium text-muted-foreground">Almacen</span>
+            <Select value={selectedWarehouseId} onValueChange={setSelectedWarehouseId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona un almacen" />
+              </SelectTrigger>
+              <SelectContent>
+                {warehouses.map((warehouse) => (
+                  <SelectItem key={warehouse.id} value={warehouse.id}>
+                    {warehouse.nombre}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <ScrollArea className="h-[360px] pr-4">
@@ -233,7 +342,7 @@ export function PosPage() {
                       <p className="text-sm font-medium">{line.name}</p>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <span>{line.sku || "Sin SKU"}</span>
-                        <span>•</span>
+                        <span>-</span>
                         <span>{formatCurrency(line.price)}</span>
                       </div>
                       <div className="flex items-center gap-2">
@@ -384,11 +493,7 @@ export function PosPage() {
                           {outOfStock ? "Agotado" : `${product.stock} uds.`}
                         </Badge>
                       </div>
-                      <Button
-                        className="w-full"
-                        onClick={() => handleAddToCart(product)}
-                        disabled={outOfStock}
-                      >
+                      <Button className="w-full" onClick={() => handleAddToCart(product)} disabled={outOfStock}>
                         Agregar al ticket
                       </Button>
                     </CardContent>

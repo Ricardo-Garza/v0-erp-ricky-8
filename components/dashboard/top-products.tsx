@@ -2,9 +2,9 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { useFirestore } from "@/hooks/use-firestore"
-import { COLLECTIONS } from "@/lib/firestore"
-import type { Order } from "@/lib/types"
+import { useSalesData } from "@/hooks/use-sales-data"
+import { useAuth } from "@/hooks/use-auth"
+import type { SalesOrder } from "@/lib/types"
 import { useEffect, useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Package } from "lucide-react"
@@ -17,28 +17,32 @@ interface ProductSales {
 }
 
 export function TopProducts() {
-  const { items: orders, loading } = useFirestore<Order>(COLLECTIONS.orders, [], true)
+  const { user } = useAuth()
+  const { salesOrders, loading } = useSalesData(user?.companyId || "", user?.uid)
   const [topProducts, setTopProducts] = useState<ProductSales[]>([])
 
   useEffect(() => {
-    if (!orders || orders.length === 0) {
+    if (!salesOrders || salesOrders.length === 0) {
       setTopProducts([])
       return
     }
 
     const productMap: Record<string, { sales: number; revenue: number }> = {}
 
-    orders.forEach((order) => {
+    salesOrders.forEach((order: SalesOrder) => {
       try {
-        if (order && (order.status === "completed" || order.status === "processing")) {
-          const productName = order.product || "Producto Desconocido"
+        if (order && ["confirmed", "in_progress", "delivered", "invoiced", "invoiced_partial"].includes(order.status)) {
+          const items = order.items || order.lines || []
+          items.forEach((item) => {
+            const productName = item.nombre || item.productName || "Producto Desconocido"
 
-          if (!productMap[productName]) {
-            productMap[productName] = { sales: 0, revenue: 0 }
-          }
+            if (!productMap[productName]) {
+              productMap[productName] = { sales: 0, revenue: 0 }
+            }
 
-          productMap[productName].sales += order.quantity || 1
-          productMap[productName].revenue += order.total || 0
+            productMap[productName].sales += item.cantidad || item.quantity || 0
+            productMap[productName].revenue += item.subtotal || item.total || 0
+          })
         }
       } catch (err) {
         console.error("[v0] Error processing order in top products:", err)
@@ -55,7 +59,7 @@ export function TopProducts() {
     productsArray.sort((a, b) => (b.revenue || 0) - (a.revenue || 0))
 
     setTopProducts(productsArray.slice(0, 5))
-  }, [orders])
+  }, [salesOrders])
 
   return (
     <Card className="border-white/10 bg-white/10 text-white shadow-[0_20px_45px_rgba(15,23,42,0.35)]">

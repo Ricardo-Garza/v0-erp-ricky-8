@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -9,6 +9,8 @@ import { Edit, Trash2, Search, Settings2, Download, PackagePlus, Plus } from "lu
 import { useFirestore } from "@/hooks/use-firestore"
 import { useUserPreferences } from "@/hooks/use-user-preferences"
 import { useInventoryCalculations } from "@/hooks/use-inventory-calculations"
+import { useAuth } from "@/hooks/use-auth"
+import { useWarehouseData } from "@/hooks/use-warehouse-data"
 import { COLLECTIONS } from "@/lib/firestore"
 import { ColumnConfigModal } from "./column-config-modal"
 import { DemandPeriodSelector } from "./demand-period-selector"
@@ -16,6 +18,7 @@ import { GoodsReceiptDialog } from "./goods-receipt-dialog"
 import { SupplierProductDialog } from "@/components/suppliers/supplier-product-dialog"
 import type { StockMovement } from "@/lib/types"
 import type { SupplierProduct } from "@/lib/types"
+import { where } from "firebase/firestore"
 
 interface Product {
   id: string
@@ -64,13 +67,42 @@ export function InventoryTable() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [editingSupplierProduct, setEditingSupplierProduct] = useState<SupplierProduct | undefined>()
 
-  const { items: products, loading, remove, update, create } = useFirestore<Product>(COLLECTIONS.products, [], true)
+  const { user } = useAuth()
+  const companyId = (user as any)?.companyId || user?.uid || ""
+  const companyFilter = companyId ? [where("companyId", "==", companyId)] : []
+
+  const { inventoryStock, warehouses, createMovement } = useWarehouseData()
+  const { items: products, loading, remove, update, create } = useFirestore<Product>(
+    COLLECTIONS.products,
+    companyFilter,
+    true,
+    false,
+  )
   const { preferences, loading: prefsLoading, savePreferences } = useUserPreferences()
-  const { demandData, loading: demandLoading } = useInventoryCalculations(products, preferences.demandPeriodDays)
+  const stockByProduct = useMemo(() => {
+    const map = new Map<string, number>()
+    inventoryStock.forEach((stock: any) => {
+      const available =
+        typeof stock.cantidadDisponible === "number" ? stock.cantidadDisponible : stock.cantidadActual || 0
+      map.set(stock.productoId, (map.get(stock.productoId) || 0) + available)
+    })
+    return map
+  }, [inventoryStock])
 
-  const { create: createStockMovement } = useFirestore<StockMovement>(COLLECTIONS.stockMovements, [], true)
+  const productsWithStock = useMemo(() => {
+    return (products || []).map((product) => ({
+      ...product,
+      stock: stockByProduct.get(product.id) || 0,
+    }))
+  }, [products, stockByProduct])
 
-  const filteredProducts = products.filter(
+  const { demandData, loading: demandLoading } = useInventoryCalculations(
+    productsWithStock,
+    preferences.demandPeriodDays,
+    companyId,
+  )
+
+  const filteredProducts = productsWithStock.filter(
     (product) =>
       product?.name?.toLowerCase().includes(search.toLowerCase()) ||
       product?.category?.toLowerCase().includes(search.toLowerCase()) ||
@@ -78,7 +110,7 @@ export function InventoryTable() {
   )
 
   const handleDelete = async (id: string) => {
-    if (confirm("¿Estás seguro de eliminar este producto?")) {
+    if (confirm("Estas seguro de eliminar este producto?")) {
       await remove(id)
     }
   }
@@ -179,12 +211,13 @@ export function InventoryTable() {
       leadTimeMax: data.leadTimeMax,
       leadTimePromedio: data.leadTimePromedio,
       cantidadMaxima: data.cantidadMaxima,
+      companyId: editingProduct?.companyId || companyId,
     }
 
     try {
       if (editingProduct?.id) {
         await update(editingProduct.id, mapped)
-      } else if (data.productoId) {
+      } else if (typeof data.productoId === "string" && data.productoId) {
         await update(data.productoId, mapped)
       } else {
         await create(mapped as Omit<Product, "id">)
@@ -200,12 +233,36 @@ export function InventoryTable() {
   }
 
   const handleSaveReceipt = async (receiptData: Partial<StockMovement>) => {
-    await createStockMovement(receiptData)
-    if (selectedProduct) {
-      const receivedQty = Number(receiptData.cantidad || 0)
-      const nextStock = (selectedProduct.stock || 0) + (Number.isNaN(receivedQty) ? 0 : receivedQty)
-      await update(selectedProduct.id, { stock: nextStock })
+    if (!selectedProduct) return
+    if (!receiptData.almacenId || !receiptData.almacenNombre) {
+      alert("Selecciona un almacen para registrar la recepcion.")
+      return
     }
+
+    await createMovement({
+      folio: receiptData.folio || `REC-${Date.now()}`,
+      almacenId: receiptData.almacenId,
+      almacenNombre: receiptData.almacenNombre,
+      productoId: selectedProduct.id,
+      productoNombre: selectedProduct.name,
+      sku: selectedProduct.sku || "",
+      unidadBase: (selectedProduct as any).baseUnit || "PZA",
+      tipo: receiptData.tipo || "recepcion_compra",
+      cantidad: receiptData.cantidad || 0,
+      costoUnitario: (receiptData as any).costo || 0,
+      fecha: receiptData.fecha || new Date().toISOString(),
+      motivo: receiptData.motivo || "Recepcion de inventario",
+      referencia: receiptData.referencia || "",
+      lote: receiptData.lote || null,
+      serie: receiptData.serie || null,
+      fechaCaducidad: receiptData.fechaCaducidad || null,
+      proveedorId: (receiptData as any).proveedorId || null,
+      proveedorNombre: (receiptData as any).proveedorOrigen || null,
+      recepcionId: receiptData.recepcionId || null,
+      recepcionFolio: receiptData.recepcionFolio || null,
+      notas: receiptData.notas || "",
+    })
+
     setReceiptDialogOpen(false)
     setSelectedProduct(null)
   }
@@ -215,9 +272,9 @@ export function InventoryTable() {
       [
         "SKU",
         "Producto",
-        "Categoría",
+        "Categoria",
         "Stock",
-        "Stock Mín.",
+        "Stock Min.",
         "Precio",
         "Proveedor",
         `Demanda Prom. (${preferences.demandPeriodDays}d)`,
@@ -332,13 +389,13 @@ export function InventoryTable() {
                       <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Producto</th>
                     )}
                     {cols.category && (
-                      <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Categoría</th>
+                      <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Categoria</th>
                     )}
                     {cols.stock && (
                       <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Stock</th>
                     )}
                     {cols.minStock && (
-                      <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Stock Mín.</th>
+                      <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Stock Min.</th>
                     )}
                     {cols.price && (
                       <th className="text-left py-3 px-2 text-sm font-medium text-muted-foreground">Precio</th>
@@ -432,7 +489,7 @@ export function InventoryTable() {
                               variant="ghost"
                               size="icon"
                               onClick={() => handleReceiveGoods(product)}
-                              title="Recibir Mercancía"
+                              title="Recibir Mercancia"
                             >
                               <PackagePlus className="w-4 h-4" />
                             </Button>
@@ -472,6 +529,7 @@ export function InventoryTable() {
           onOpenChange={setReceiptDialogOpen}
           productId={selectedProduct.id}
           productName={selectedProduct.name}
+          warehouses={warehouses}
           onSave={handleSaveReceipt}
         />
       )}
