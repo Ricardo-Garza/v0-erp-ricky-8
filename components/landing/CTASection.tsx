@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, MessageCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 const CTASection = () => {
   const ref = useRef(null);
@@ -24,16 +26,50 @@ const CTASection = () => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    toast({
-      title: "¡Solicitud enviada!",
-      description: "Nos pondremos en contacto contigo pronto.",
-    });
-    
-    setFormData({ name: "", email: "", company: "", phone: "" });
-    setIsSubmitting(false);
+    try {
+      await addDoc(collection(db, "demo_requests"), {
+        name: formData.name,
+        company: formData.company,
+        email: formData.email,
+        phone: formData.phone || null,
+        source: "landing",
+        status: "new",
+        createdAt: serverTimestamp(),
+      });
+
+    const message = [
+      "Hola, buen día.",
+      "Me gustaría solicitar una demo de NEXO ERP.",
+      "",
+      "Datos de contacto:",
+      `• Nombre: ${formData.name}`,
+      `• Empresa: ${formData.company}`,
+      `• Correo: ${formData.email}`,
+      formData.phone ? `• Teléfono: ${formData.phone}` : null,
+      "",
+      "Quedo atento(a) para coordinar la demo.",
+      "¡Gracias!",
+    ]
+        .filter(Boolean)
+        .join("\n");
+
+    const whatsappUrl = `https://wa.me/528120076491?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+
+      toast({
+        title: "Mensaje listo en WhatsApp",
+        description: "Revisa la ventana de WhatsApp para enviar tu solicitud.",
+      });
+    } catch (error) {
+      console.error("[Landing] Error saving demo request:", error);
+      toast({
+        title: "No se pudo enviar",
+        description: "Intenta nuevamente o escribe por WhatsApp.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,7 +149,7 @@ const CTASection = () => {
                   className="bg-[#25D366] text-white hover:bg-[#20c15c] shadow-lg shadow-[#25D366]/35 border border-white/10"
                   asChild
                 >
-                  <a href="https://wa.me/5215512345678" target="_blank" rel="noopener noreferrer">
+                  <a href="https://wa.me/528120076491" target="_blank" rel="noopener noreferrer">
                     <MessageCircle className="mr-2 w-5 h-5" />
                     Escribir por WhatsApp
                   </a>

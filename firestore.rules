@@ -251,6 +251,12 @@ service cloud.firestore {
       allow update, delete: if isOwner(resource.data.userId);
     }
 
+    // Landing demo requests (public create)
+    match /demo_requests/{requestId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
     match /purchaseOrders/{orderId} {
       allow read: if isAuthenticated();
       allow create: if hasValidUserId();
