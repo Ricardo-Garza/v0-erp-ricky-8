@@ -238,7 +238,7 @@ const CTASection = () => {
 
                 <p className="text-xs text-muted-foreground text-center mt-4">
                   Al enviar, aceptas nuestro{" "}
-                  <a href="#" className="underline hover:text-foreground">
+                  <a href="/aviso-de-privacidad" className="underline hover:text-foreground">
                     aviso de privacidad
                   </a>
                 </p>

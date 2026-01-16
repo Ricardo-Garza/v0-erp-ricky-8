@@ -15,7 +15,7 @@ const Footer = () => {
   const footerLinks = [
     { label: "Contacto", href: "#contacto" },
     { label: "Demo", href: "#contacto" },
-    { label: "Aviso de privacidad", href: "#" },
+    { label: "Aviso de privacidad", href: "/aviso-de-privacidad" },
   ];
 
   return (
