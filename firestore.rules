@@ -92,43 +92,6 @@ service cloud.firestore {
       allow update, delete: if isOwner(resource.data.userId);
     }
 
-    // Banking Collections
-    match /bankAccounts/{accountId} {
-      allow read: if isAuthenticated();
-      allow create: if hasValidUserId();
-      allow update, delete: if isOwner(resource.data.userId);
-    }
-
-    match /checks/{checkId} {
-      allow read: if isAuthenticated();
-      allow create: if hasValidUserId();
-      allow update, delete: if isOwner(resource.data.userId);
-    }
-
-    match /bankTransfers/{transferId} {
-      allow read: if isAuthenticated();
-      allow create: if hasValidUserId();
-      allow update, delete: if isOwner(resource.data.userId);
-    }
-
-    match /bankTransactions/{transactionId} {
-      allow read: if isAuthenticated();
-      allow create: if hasValidUserId();
-      allow update, delete: if isOwner(resource.data.userId);
-    }
-
-    match /bankStatements/{statementId} {
-      allow read: if isAuthenticated();
-      allow create: if hasValidUserId();
-      allow update, delete: if isOwner(resource.data.userId);
-    }
-
-    match /reconciliationItems/{itemId} {
-      allow read: if isAuthenticated();
-      allow create: if hasValidUserId();
-      allow update, delete: if isOwner(resource.data.userId);
-    }
-
     // Inventory & Products
     match /products/{productId} {
       allow read: if isAuthenticated();

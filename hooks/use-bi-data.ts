@@ -15,7 +15,6 @@ import type {
   ServiceTicket,
   WorkOrder,
   JournalEntry,
-  BankTransaction,
   Employee,
 } from "@/lib/types"
 import { useAuth } from "@/contexts/auth-context"
@@ -39,7 +38,6 @@ export function useBiData(companyId: string) {
   const [serviceTickets, setServiceTickets] = useState<ServiceTicket[]>([])
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([])
   const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([])
-  const [bankTransactions, setBankTransactions] = useState<BankTransaction[]>([])
   const [employees, setEmployees] = useState<Employee[]>([])
 
   const [loading, setLoading] = useState(true)
@@ -107,9 +105,6 @@ export function useBiData(companyId: string) {
       ]),
       subscribeToCollection<WorkOrder>(COLLECTIONS.workOrders, setWorkOrders, [where("companyId", "==", companyId)]),
       subscribeToCollection<JournalEntry>(COLLECTIONS.journalEntries, setJournalEntries, [
-        where("companyId", "==", companyId),
-      ]),
-      subscribeToCollection<BankTransaction>(COLLECTIONS.bankTransactions, setBankTransactions, [
         where("companyId", "==", companyId),
       ]),
       subscribeToCollection<Employee>(COLLECTIONS.employees, setEmployees, [where("companyId", "==", companyId)]),
@@ -298,7 +293,6 @@ export function useBiData(companyId: string) {
       serviceTickets,
       workOrders,
       journalEntries,
-      bankTransactions,
       employees,
     }
     return sources[collectionName] || []
@@ -321,7 +315,6 @@ export function useBiData(companyId: string) {
     serviceTickets: Array.isArray(serviceTickets) ? serviceTickets : [],
     workOrders: Array.isArray(workOrders) ? workOrders : [],
     journalEntries: Array.isArray(journalEntries) ? journalEntries : [],
-    bankTransactions: Array.isArray(bankTransactions) ? bankTransactions : [],
     employees: Array.isArray(employees) ? employees : [],
 
     getDataSource,

@@ -8,7 +8,6 @@ import {
   FileText, 
   Package, 
   Truck, 
-  Wallet, 
   BarChart3,
   ShieldCheck
 } from "lucide-react";
@@ -38,11 +37,6 @@ const modules = [
     icon: Truck,
     title: "Compras",
     description: "Órdenes de compra y gestión de proveedores",
-  },
-  {
-    icon: Wallet,
-    title: "Finanzas",
-    description: "Cuentas por cobrar, pagar y flujo de efectivo",
   },
   {
     icon: BarChart3,

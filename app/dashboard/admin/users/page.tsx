@@ -31,7 +31,6 @@ const PERMISSIONS = [
   { id: "crm", label: "CRM" },
   { id: "sales", label: "Ventas" },
   { id: "invoicing", label: "Facturacion" },
-  { id: "banking", label: "Bancos" },
   { id: "suppliers", label: "Proveedores" },
   { id: "inventory", label: "Inventario" },
   { id: "warehouse", label: "Almacen" },

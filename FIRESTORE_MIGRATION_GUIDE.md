@@ -80,7 +80,6 @@ El ERP ahora usa **Firebase Firestore** como base de datos principal en lugar de
 /invoices/{invoiceId}
 /quotations/{quotationId}
 /prospects/{prospectId}
-/banks/{bankId}
 /documents/{documentId}
 /requisitions/{requisitionId}
 /attributes/{attributeId}

@@ -115,16 +115,6 @@ const sampleData = {
       companyId: "default",
     },
   ],
-  banks: [
-    {
-      name: "BBVA Bancomer",
-      accountNumber: "0112345678",
-      currency: "MXN",
-      balance: 250000,
-      type: "Cuenta de Cheques",
-      companyId: "default",
-    },
-  ],
   prospects: [
     {
       company: "Tecnología XYZ S.A.",

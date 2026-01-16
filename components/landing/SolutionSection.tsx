@@ -8,7 +8,6 @@ import {
   FileText, 
   Package, 
   Truck, 
-  Wallet, 
   BarChart3,
   Shield
 } from "lucide-react";
@@ -19,7 +18,6 @@ const modules = [
   { icon: FileText, label: "Facturación", color: "from-purple-500 to-purple-600" },
   { icon: Package, label: "Inventarios", color: "from-orange-500 to-orange-600" },
   { icon: Truck, label: "Compras", color: "from-red-500 to-red-600" },
-  { icon: Wallet, label: "Finanzas", color: "from-teal-500 to-teal-600" },
   { icon: BarChart3, label: "Reportes", color: "from-indigo-500 to-indigo-600" },
   { icon: Shield, label: "Usuarios", color: "from-pink-500 to-pink-600" },
 ];

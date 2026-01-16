@@ -42,7 +42,6 @@ export function AppHeader() {
     "/dashboard/inventory": "Inventario",
     "/dashboard/warehouse": "Almacén",
     "/dashboard/accounting": "Contabilidad",
-    "/dashboard/banking": "Bancos",
     "/dashboard/production": "Producción",
     "/dashboard/maintenance": "Mantenimiento",
     "/dashboard/service": "Servicio",

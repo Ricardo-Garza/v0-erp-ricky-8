@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils"
 import { useAuth } from "@/hooks/use-auth"
 import {
   LayoutDashboard,
-  Building2,
   Users,
   Package,
   Warehouse,
@@ -34,7 +33,6 @@ const sections = [
       { name: "Clientes / CRM", href: "/dashboard/clients", icon: Users },
       { name: "Ventas", href: "/dashboard/ventas/ordenes", icon: ShoppingBasket },
       { name: "Facturacion", href: "/dashboard/facturacion", icon: FileText },
-      { name: "Bancos", href: "/dashboard/banking", icon: Building2 },
       { name: "Proveedores", href: "/dashboard/suppliers", icon: Package },
       { name: "Inventario", href: "/dashboard/inventory", icon: Package },
       { name: "Almacen", href: "/dashboard/warehouse", icon: Warehouse },

@@ -19,7 +19,6 @@ import {
   TrendingUp,
   BarChart3,
   Package,
-  Building2,
   Calculator,
 } from "lucide-react"
 
@@ -216,7 +215,6 @@ export default function WebMobilePage() {
             {[
               { name: "Clientes / CRM", icon: Users },
               { name: "Proveedores", icon: Package },
-              { name: "Bancos", icon: Building2 },
               { name: "Contabilidad", icon: Calculator },
               { name: "Business Intelligence", icon: BarChart3 },
               { name: "Cotizaciones", icon: FileText },

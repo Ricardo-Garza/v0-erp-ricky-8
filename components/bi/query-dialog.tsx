@@ -23,8 +23,7 @@ const dataSources = [
   { value: "purchaseOrders", label: "Órdenes de Compra" },
   { value: "inventoryStock", label: "Inventario" },
   { value: "stockMovements", label: "Movimientos de Stock" },
-  { value: "bankTransactions", label: "Transacciones Bancarias" },
-  { value: "journalEntries", label: "Asientos Contables" },
+    { value: "journalEntries", label: "Asientos Contables" },
   { value: "serviceTickets", label: "Tickets de Servicio" },
   { value: "workOrders", label: "Órdenes de Trabajo" },
 ]

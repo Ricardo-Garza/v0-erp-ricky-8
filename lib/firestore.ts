@@ -34,7 +34,6 @@ export const COLLECTIONS = {
   invoices: "invoices",
   quotations: "quotations",
   prospects: "prospects",
-  banks: "banks",
   documents: "documents",
   requisitions: "requisitions",
   attributes: "attributes",
@@ -47,12 +46,6 @@ export const COLLECTIONS = {
   purchases: "purchases", // New: Track purchases and production costs
   expenses: "expenses", // New: Track operating expenses
   inventorySnapshots: "inventorySnapshots", // New: Monthly inventory snapshots
-  bankAccounts: "bankAccounts", // New banking collections
-  bankTransactions: "bankTransactions",
-  checks: "checks",
-  bankTransfers: "bankTransfers",
-  bankStatements: "bankStatements",
-  reconciliationItems: "reconciliationItems",
   leads: "leads",
   customerDocuments: "customerDocuments",
   accountsReceivable: "accountsReceivable",

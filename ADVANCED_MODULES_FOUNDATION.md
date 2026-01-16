@@ -19,7 +19,6 @@
 - Vacation request workflow with approval system
 - Performance reviews
 
-**Integration**: Links to accounting (journal entries for payroll), banking (payment processing)
 
 ---
 

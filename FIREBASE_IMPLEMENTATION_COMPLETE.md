@@ -218,7 +218,6 @@ service cloud.firestore {
 | `suppliers` | Proveedores | name, rfc, email, phone, rating |
 | `employees` | Empleados | name, position, department, salary |
 | `invoices` | Facturas | customerId, amount, dueDate, status |
-| `banks` | Cuentas bancarias | name, accountNumber, balance |
 | `prospects` | Prospectos de venta | company, contact, stage, estimatedValue |
 
 ---

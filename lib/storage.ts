@@ -4,7 +4,6 @@
  */
 
 type DataStore = {
-  banks: any[]
   clients: any[]
   suppliers: any[]
   products: any[]
@@ -24,7 +23,6 @@ type DataStore = {
 const STORAGE_KEY = "nexo-erp-data"
 
 const defaultData: DataStore = {
-  banks: [],
   clients: [],
   suppliers: [],
   products: [],
