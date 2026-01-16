@@ -42,7 +42,7 @@ const HowItWorksSection = () => {
           transition={{ duration: 0.5 }}
           className="text-center mb-16"
         >
-          <span className="text-accent font-semibold text-sm uppercase tracking-wider">
+          <span className="text-primary font-semibold text-sm uppercase tracking-wider">
             Cómo funciona
           </span>
           <h2 className="text-3xl md:text-4xl font-bold mt-3 mb-4">
@@ -84,7 +84,7 @@ const HowItWorksSection = () => {
                     
                     {/* Step number badge */}
                     <div className="absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full">
-                      <span className="text-4xl md:text-5xl font-bold text-accent/20">
+                      <span className="text-4xl md:text-5xl font-bold text-primary/30">
                         {step.number}
                       </span>
                     </div>

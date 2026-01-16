@@ -120,10 +120,15 @@ export default function LoginPage() {
               )}
             </Button>
 
-            <div className="text-center">
+            <div className="text-center space-y-2">
               <Link href="/forgot-password" className="text-sm text-primary hover:underline">
                 ¿Olvidaste tu contraseña?
               </Link>
+              <div>
+                <Link href="/" className="text-sm text-muted-foreground hover:text-foreground hover:underline">
+                  Volver al inicio
+                </Link>
+              </div>
             </div>
           </form>
         </CardContent>

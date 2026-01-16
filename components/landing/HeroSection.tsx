@@ -118,23 +118,23 @@ const HeroSection = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-accent/20 to-primary/20 rounded-2xl blur-2xl transform scale-95" />
             
             {/* Dashboard placeholder */}
-            <div className="relative bg-card rounded-2xl shadow-2xl border border-border overflow-hidden">
+            <div className="relative rounded-2xl shadow-2xl border border-white/10 overflow-hidden bg-gradient-to-br from-[#0b1624] via-[#0e1b2e] to-[#0b1728]">
               {/* Browser header */}
-              <div className="flex items-center gap-2 px-4 py-3 bg-muted/50 border-b border-border">
+              <div className="flex items-center gap-2 px-4 py-3 bg-white/5 border-b border-white/10">
                 <div className="flex gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-destructive/60" />
                   <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
-                  <div className="w-3 h-3 rounded-full bg-accent/60" />
+                  <div className="w-3 h-3 rounded-full bg-emerald-400/60" />
                 </div>
                 <div className="flex-1 mx-4">
-                  <div className="bg-background rounded-md px-3 py-1 text-xs text-muted-foreground">
+                  <div className="bg-black/30 rounded-md px-3 py-1 text-xs text-slate-300">
                     app.nexoerp.com/dashboard
                   </div>
                 </div>
               </div>
               
               {/* Dashboard content placeholder */}
-              <div className="p-6 space-y-4">
+              <div className="p-6 space-y-4 text-slate-200">
                 {/* Stats row */}
                 <div className="grid grid-cols-3 gap-4">
                   {[
@@ -147,10 +147,10 @@ const HeroSection = () => {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: 0.5 + i * 0.1 }}
-                      className="bg-muted/50 rounded-lg p-4"
+                      className="rounded-lg p-4 bg-white/5 border border-white/10 shadow-[0_12px_24px_rgba(2,6,23,0.35)]"
                     >
-                      <p className="text-xs text-muted-foreground">{stat.label}</p>
-                      <p className="text-lg font-bold text-foreground">{stat.value}</p>
+                      <p className="text-xs text-slate-300">{stat.label}</p>
+                      <p className="text-lg font-bold text-white">{stat.value}</p>
                     </motion.div>
                   ))}
                 </div>
@@ -160,7 +160,7 @@ const HeroSection = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.5, delay: 0.8 }}
-                  className="bg-muted/30 rounded-lg p-4 h-48"
+                  className="rounded-lg p-4 h-48 bg-gradient-to-br from-white/5 to-white/0 border border-white/10"
                 >
                   <div className="flex items-end justify-between h-full gap-2 pt-4">
                     {[40, 65, 45, 80, 55, 90, 70, 85, 60, 75, 95, 80].map((height, i) => (
@@ -169,7 +169,7 @@ const HeroSection = () => {
                         initial={{ height: 0 }}
                         animate={{ height: `${height}%` }}
                         transition={{ duration: 0.8, delay: 1 + i * 0.05 }}
-                        className="flex-1 bg-gradient-to-t from-accent to-accent/50 rounded-t-sm"
+                        className="flex-1 bg-gradient-to-t from-cyan-400/90 via-sky-400/70 to-emerald-300/50 rounded-t-sm"
                       />
                     ))}
                   </div>
@@ -183,13 +183,13 @@ const HeroSection = () => {
                   className="space-y-2"
                 >
                   {[1, 2, 3].map((_, i) => (
-                    <div key={i} className="flex items-center gap-4 p-3 bg-muted/30 rounded-lg">
-                      <div className="w-8 h-8 rounded-full bg-accent/20" />
+                    <div key={i} className="flex items-center gap-4 p-3 rounded-lg bg-white/5 border border-white/10">
+                      <div className="w-8 h-8 rounded-full bg-cyan-400/30" />
                       <div className="flex-1 space-y-1">
-                        <div className="h-3 bg-muted rounded w-1/3" />
-                        <div className="h-2 bg-muted/50 rounded w-1/2" />
+                        <div className="h-3 bg-white/20 rounded w-1/3" />
+                        <div className="h-2 bg-white/10 rounded w-1/2" />
                       </div>
-                      <div className="h-6 w-16 bg-accent/20 rounded" />
+                      <div className="h-6 w-16 bg-emerald-400/20 rounded" />
                     </div>
                   ))}
                 </motion.div>

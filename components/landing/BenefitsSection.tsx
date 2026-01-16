@@ -61,7 +61,7 @@ const BenefitsSection = () => {
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.6 }}
           >
-            <span className="text-accent font-semibold text-sm uppercase tracking-wider">
+            <span className="text-primary font-semibold text-sm uppercase tracking-wider">
               Beneficios clave
             </span>
             <h2 className="text-3xl md:text-4xl font-bold mt-3 mb-6">
@@ -85,7 +85,7 @@ const BenefitsSection = () => {
                   transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
                   className="text-center"
                 >
-                  <div className="text-3xl md:text-4xl font-bold text-accent mb-1">
+                  <div className="text-3xl md:text-4xl font-bold text-primary mb-1 drop-shadow-[0_1px_8px_rgba(56,189,248,0.45)]">
                     {stat.value}
                   </div>
                   <div className="text-sm text-muted-foreground">{stat.label}</div>
@@ -105,12 +105,12 @@ const BenefitsSection = () => {
                 whileHover={{ x: 5 }}
                 className="group"
               >
-                <div className="flex gap-4 p-4 rounded-xl bg-card border border-border hover:border-accent/30 hover:shadow-lg transition-all duration-300">
-                  <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors">
-                    <benefit.icon className="w-6 h-6 text-accent" />
+                <div className="flex gap-4 p-4 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-lg transition-all duration-300">
+                  <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0 group-hover:bg-primary/25 transition-colors ring-1 ring-white/10">
+                    <benefit.icon className="w-6 h-6 text-primary-foreground" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground mb-1 group-hover:text-accent transition-colors">
+                    <h3 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
                       {benefit.title}
                     </h3>
                     <p className="text-sm text-muted-foreground">

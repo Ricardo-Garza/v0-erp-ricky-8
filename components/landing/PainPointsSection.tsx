@@ -55,7 +55,7 @@ const PainPointsSection = () => {
           transition={{ duration: 0.5 }}
           className="text-center mb-16"
         >
-          <span className="text-accent font-semibold text-sm uppercase tracking-wider">
+          <span className="text-primary font-semibold text-sm uppercase tracking-wider">
             El problema actual
           </span>
           <h2 className="text-3xl md:text-4xl font-bold mt-3 mb-4">

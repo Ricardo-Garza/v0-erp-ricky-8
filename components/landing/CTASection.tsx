@@ -109,9 +109,8 @@ const CTASection = () => {
                 className="mt-8"
               >
                 <Button
-                  variant="outline"
                   size="lg"
-                  className="bg-white/10 border-white/20 text-primary-foreground hover:bg-white/20 backdrop-blur-sm"
+                  className="bg-[#25D366] text-white hover:bg-[#20c15c] shadow-lg shadow-[#25D366]/35 border border-white/10"
                   asChild
                 >
                   <a href="https://wa.me/5215512345678" target="_blank" rel="noopener noreferrer">
