@@ -14,7 +14,8 @@ export const metadata: Metadata = {
   description: "Sistema integral de gestión empresarial para floristerías",
   generator: "v0.app",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/icon.png",
+    apple: "/apple-icon.png",
   },
 }
 
